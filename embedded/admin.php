@@ -15,6 +15,8 @@ function wpcf_embedded_admin_init_hook() {
     add_action('load-post.php', 'wpcf_admin_post_page_load_hook');
     add_action('load-post-new.php', 'wpcf_admin_post_page_load_hook');
 
+    add_action('add_meta_boxes', 'wpcf_admin_add_meta_boxes', 10, 2);
+
     // Add callback for 'media-upload.php'
     add_filter('get_media_item_args', 'wpcf_get_media_item_args_filter');
 
@@ -104,6 +106,13 @@ function wpcf_admin_post_page_load_hook() {
     } else {
         wpcf_admin_post_init();
     }
+}
+
+function wpcf_admin_add_meta_boxes( $post_type, $post ) {
+    require_once WPCF_EMBEDDED_INC_ABSPATH . '/fields.php';
+    require_once WPCF_EMBEDDED_INC_ABSPATH . '/fields-post.php';
+
+    wpcf_add_meta_boxes( $post_type, $post );
 }
 
 /**

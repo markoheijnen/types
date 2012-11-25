@@ -42,48 +42,13 @@ function wpcf_admin_post_init($post = false) {
         return false;
     }
 
-    // Add marketing box
-    if (!in_array($post_type, array('post', 'page'))
-            && !defined('WPCF_RUNNING_EMBEDDED')) {
-        $hide_help_box = true;
-        $help_box = wpcf_get_settings('help_box');
-        $custom_types = get_option('wpcf-custom-types', array());
-        if ($help_box != 'no') {
-            if ($help_box == 'by_types' && array_key_exists($post_type,
-                            $custom_types)) {
-                $hide_help_box = false;
-            }
-            if (function_exists('wprc_is_logged_to_repo') && wprc_is_logged_to_repo(WPCF_REPOSITORY)) {
-                $hide_help_box = true;
-            }
-            if ($help_box == 'all') {
-                $hide_help_box = false;
-            }
-
-            if (!$hide_help_box) {
-                add_meta_box('wpcf-marketing',
-                        __('How-To Display Custom Content', 'wpcf'),
-                        'wpcf_admin_post_marketing_meta_box', $post_type,
-                        'side', 'high');
-            }
-        }
-    }
-
     // Get groups
     $groups = wpcf_admin_post_get_post_groups_fields($post);
     $wpcf_active = false;
     foreach ($groups as $key => $group) {
         if (!empty($group['fields'])) {
             $wpcf_active = true;
-            // Process fields
-            $group['fields'] = wpcf_admin_post_process_fields($post,
-                    $group['fields'], true);
         }
-        // Add meta boxes
-        add_meta_box($group['slug'],
-                wpcf_translate('group ' . $group['id'] . ' name', $group['name']),
-                'wpcf_admin_post_meta_box', $post_type,
-                $group['meta_box_context'], 'high', $group);
     }
 
     // Activate scripts
@@ -109,6 +74,53 @@ function wpcf_admin_post_init($post = false) {
     }
     do_action('wpcf_admin_post_init', $post_type, $post, $groups, $wpcf_active);
 }
+
+
+function wpcf_add_meta_boxes( $post_type, $post ) {
+    // Add marketing box
+    if (!in_array($post_type, array('post', 'page'))
+            && !defined('WPCF_RUNNING_EMBEDDED')) {
+        $hide_help_box = true;
+        $help_box = wpcf_get_settings('help_box');
+        if ($help_box != 'no') {
+            $custom_types = get_option('wpcf-custom-types', array());
+
+            if ($help_box == 'by_types' && array_key_exists($post_type,
+                            $custom_types)) {
+                $hide_help_box = false;
+            }
+            if (function_exists('wprc_is_logged_to_repo') && wprc_is_logged_to_repo(WPCF_REPOSITORY)) {
+                $hide_help_box = true;
+            }
+            if ($help_box == 'all') {
+                $hide_help_box = false;
+            }
+
+            if (!$hide_help_box) {
+                add_meta_box('wpcf-marketing',
+                        __('How-To Display Custom Content', 'wpcf'),
+                        'wpcf_admin_post_marketing_meta_box', $post_type,
+                        'side', 'high');
+            }
+        }
+    }
+
+    $groups = wpcf_admin_post_get_post_groups_fields($post);
+    $wpcf_active = false;
+    foreach ($groups as $key => $group) {
+        if (!empty($group['fields'])) {
+            $group['fields'] = wpcf_admin_post_process_fields($post,
+                    $group['fields'], true);
+        }
+        // Add meta boxes
+        add_meta_box($group['slug'],
+                wpcf_translate('group ' . $group['id'] . ' name', $group['name']),
+                'wpcf_admin_post_meta_box', $post_type,
+                $group['meta_box_context'], 'high', $group);
+    }
+
+}
+
 
 /**
  * Renders meta box content.
