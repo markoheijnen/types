@@ -105,7 +105,7 @@ function wpcf_add_meta_boxes( $post_type, $post ) {
         }
     }
 
-    $groups = wpcf_admin_post_get_post_groups_fields($post);
+    $groups = wpcf_admin_post_get_post_groups_fields($post,$post_type);
     $wpcf_active = false;
     foreach ($groups as $key => $group) {
         if (!empty($group['fields'])) {
@@ -900,13 +900,13 @@ function wpcf_admin_post_process_field($post = false, $field_unedited = array(),
  * @param type $post_ID
  * @return type 
  */
-function wpcf_admin_post_get_post_groups_fields($post = false,
+function wpcf_admin_post_get_post_groups_fields($post = false, $post_type = false,
         $context = 'group') {
 
     // Get post_type
     if (!empty($post)) {
         $post_type = get_post_type($post);
-    } else {
+    } else if(!$post_type) {
         if (!isset($_GET['post_type'])) {
             $post_type = 'post';
         } else if (in_array($_GET['post_type'],

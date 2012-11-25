@@ -286,7 +286,7 @@ function wpcf_pr_admin_post_meta_box_has_form_headers($post, $post_type,
         $item->post_title = '';
         $item->post_content = '';
         $item->post_type = $post_type;
-        $groups = wpcf_admin_post_get_post_groups_fields($item,
+        $groups = wpcf_admin_post_get_post_groups_fields($item, false,
                 'post_relationships_header');
         $title_dir = $sort_field == '_wp_title' ? $dir : $dir_default;
         $headers['_wp_title'] = '';
@@ -643,7 +643,7 @@ function wpcf_pr_admin_post_meta_box_has_row($post, $post_type, $data,
             }
         }
     } else {
-        $groups = wpcf_admin_post_get_post_groups_fields($item,
+        $groups = wpcf_admin_post_get_post_groups_fields($item, false,
                 'post_relationships');
         if (array_key_exists('_wp_title', $row_data)) {
             $element = wpcf_form_simple(array('field' => array(
