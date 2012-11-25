@@ -50,10 +50,10 @@ function wpcf_pr_admin_post_init_action($post_type, $post, $groups, $wpcf_active
                         array('jquery'), WPCF_VERSION);
             }
             wpcf_admin_add_js_settings('wpcf_pr_del_warning',
-                    '\'' . __('Are you sure about deleting this post?', 'wpcf') . '\'');
+                    __('Are you sure about deleting this post?', 'wpcf') );
             wpcf_admin_add_js_settings('wpcf_pr_pagination_warning',
-                    '\'' . __('If you continue without saving your changes, it might get lost.',
-                            'wpcf') . '\'');
+                    __('If you continue without saving your changes, it might get lost.',
+                            'wpcf') );
         }
     }
 }

@@ -12,9 +12,9 @@ require_once WPCF_EMBEDDED_ABSPATH . '/includes/conditional-display.php';
 function wpcf_admin_post_init($post = false) {
 
     wpcf_admin_add_js_settings('wpcf_nonce_toggle_group',
-            '\'' . wp_create_nonce('group_form_collapsed') . '\'');
+            wp_create_nonce('group_form_collapsed') );
     wpcf_admin_add_js_settings('wpcf_nonce_toggle_fieldset',
-            '\'' . wp_create_nonce('form_fieldset_toggle') . '\'');
+            wp_create_nonce('form_fieldset_toggle') );
 
     // Get post_type
     if ($post) {
@@ -842,7 +842,7 @@ function wpcf_admin_post_process_field($post = false, $field_unedited = array(),
                 $element['#attributes']['class'] = isset($element['#attributes']['class']) ? $element['#attributes']['class'] . ' wpcf-repetitive' : 'wpcf-repetitive';
             }
             wpcf_admin_add_js_settings('wpcfFormRepetitiveUniqueValuesCheckText',
-                    '\'' . __('Warning: same values set', 'wpcf') . '\'');
+                    __('Warning: same values set', 'wpcf') );
         }
 
         // Set read-only if copied by WPML

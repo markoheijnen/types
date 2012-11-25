@@ -734,9 +734,9 @@ function wpcf_admin_get_var_from_referer($var) {
  */
 function wpcf_admin_add_js_settings($id, $setting = '') {
     static $settings = array();
-    $settings['wpcf_nonce_ajax_callback'] = '\'' . wp_create_nonce('execute') . '\'';
-    $settings['wpcf_cookiedomain'] = '\'' . COOKIE_DOMAIN . '\'';
-    $settings['wpcf_cookiepath'] = '\'' . COOKIEPATH . '\'';
+    $settings['wpcf_nonce_ajax_callback'] = wp_create_nonce('execute');
+    $settings['wpcf_cookiedomain'] = COOKIE_DOMAIN . '\'';
+    $settings['wpcf_cookiepath'] = COOKIEPATH;
     if ($id == 'get') {
         $temp = $settings;
         $settings = array();
@@ -761,7 +761,7 @@ function wpcf_admin_render_js_settings() {
         //<![CDATA[
     <?php
     foreach ($settings as $id => $setting) {
-        echo 'var ' . $id . ' = ' . $setting . ';' . "\r\n";
+        echo "var " . $id . " = '" . esc_js( $setting ) . "';" . "\r\n";
     }
 
     ?>

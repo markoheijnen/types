@@ -167,9 +167,9 @@ function wpcf_admin_save_fields_groups_submit($form) {
  */
 function wpcf_admin_fields_form() {
     wpcf_admin_add_js_settings('wpcf_nonce_toggle_group',
-            '\'' . wp_create_nonce('group_form_collapsed') . '\'');
+            wp_create_nonce('group_form_collapsed') );
     wpcf_admin_add_js_settings('wpcf_nonce_toggle_fieldset',
-            '\'' . wp_create_nonce('form_fieldset_toggle') . '\'');
+            wp_create_nonce('form_fieldset_toggle') );
     $default = array();
 
     // If it's update, get data
@@ -654,17 +654,17 @@ function wpcf_admin_fields_form() {
         '#after' => '<div id="wpcf-fields-form-filters-association-summary" style="margin-top:10px;font-style:italic;"></div></div>',
     );
     wpcf_admin_add_js_settings('wpcf_filters_association_or',
-            '\'' . __('This group will appear on %pt% edit pages where content belongs to taxonomy: %tx% or View Template is: %vt%',
-                    'wpcf') . '\'');
+            __('This group will appear on %pt% edit pages where content belongs to taxonomy: %tx% or View Template is: %vt%',
+                    'wpcf') );
     wpcf_admin_add_js_settings('wpcf_filters_association_and',
-            '\'' . __('This group will appear on %pt% edit pages where content belongs to taxonomy: %tx% and View Template is: %vt%',
-                    'wpcf') . '\'');
+            __('This group will appear on %pt% edit pages where content belongs to taxonomy: %tx% and View Template is: %vt%',
+                    'wpcf') );
     wpcf_admin_add_js_settings('wpcf_filters_association_all_pages',
-            '\'' . __('all', 'wpcf') . '\'');
+            __('all', 'wpcf') );
     wpcf_admin_add_js_settings('wpcf_filters_association_all_taxonomies',
-            '\'' . __('any', 'wpcf') . '\'');
+            __('any', 'wpcf') );
     wpcf_admin_add_js_settings('wpcf_filters_association_all_templates',
-            '\'' . __('any', 'wpcf') . '\'');
+            __('any', 'wpcf') );
 
     $additional_filters = apply_filters('wpcf_fields_form_additional_filters',
             array(), $update);
@@ -772,11 +772,11 @@ function wpcf_admin_fields_form() {
 
     // Add JS settings
     wpcf_admin_add_js_settings('wpcfFormUniqueValuesCheckText',
-            '\'' . __('Warning: same values selected', 'wpcf') . '\'');
+            __('Warning: same values selected', 'wpcf') );
     wpcf_admin_add_js_settings('wpcfFormUniqueNamesCheckText',
-            '\'' . __('Warning: field name already used', 'wpcf') . '\'');
+            __('Warning: field name already used', 'wpcf') );
     wpcf_admin_add_js_settings('wpcfFormUniqueSlugsCheckText',
-            '\'' . __('Warning: field slug already used', 'wpcf') . '\'');
+            __('Warning: field slug already used', 'wpcf') );
 
     return $form;
 }

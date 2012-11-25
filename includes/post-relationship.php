@@ -39,9 +39,9 @@ function wpcf_pr_post_type_form_filter($form, $post_type) {
         $txt_has = sprintf(__("Children: %s", 'wpcf'), implode(', ', $txt_has));
     }
     wpcf_admin_add_js_settings('wpcf_pr_has_empty_txt',
-            '\'' . __("Children: None", 'wpcf') . '\'');
+            __("Children: None", 'wpcf') );
     wpcf_admin_add_js_settings('wpcf_pr_has_txt',
-            '\'' . __("Children: %s", 'wpcf') . '\'');
+            __("Children: %s", 'wpcf') );
     // Others belonging to
     if (!empty($belongs)) {
         $txt_belongs = array();
@@ -54,9 +54,9 @@ function wpcf_pr_post_type_form_filter($form, $post_type) {
         $txt_belongs = __("Parent: None", 'wpcf');
     }
     wpcf_admin_add_js_settings('wpcf_pr_belongs_empty_txt',
-            '\'' . __("Parent: None", 'wpcf') . '\'');
+            __("Parent: None", 'wpcf') );
     wpcf_admin_add_js_settings('wpcf_pr_belongs_txt',
-            '\'' . __("Parent: %s", 'wpcf') . '\'');
+            __("Parent: %s", 'wpcf') );
 
     $form['table-pr-open'] = array(
         '#type' => 'markup',
