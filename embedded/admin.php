@@ -356,7 +356,7 @@ function wpcf_form_render_js_validation($form = '.wpcf-form-validate',
             continue;
         }
         if (in_array($element['#type'], array('radios'))) {
-            $output .= 'jQuery(\'input:[name="' . $element['#name'] . '"]\').rules("add", {' . "\r\n";
+            $output .= 'jQuery(\'input[name="' . $element['#name'] . '"]\').rules("add", {' . "\r\n";
         } else {
             $output .= 'jQuery("#' . $id . '").rules("add", {' . "\r\n";
         }

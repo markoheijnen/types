@@ -526,7 +526,7 @@ function wpcf_fields_date_editor_form_script() {
                     jQuery('#wpcf-toggle').slideUp();
                 }
             });
-            if (jQuery('input:radio[name="wpcf[style]"]:checked').val() == 'text') {
+            if (jQuery('input[name="wpcf[style]"]:checked').val() == 'text') {
                 jQuery('#wpcf-toggle').show();
             }
         });

@@ -137,7 +137,7 @@ input.wpcf-form-error {
 .wpcf-form-fields-align-right a.wpcf-fields-add-ajax-link {
 /*    line-height: 30px;*/
     margin: 3px 5px 2px 0;
-    height: 15px;
+    /*height: 15px;*/
     float: left;
 }
 .wpcf-fields-form .ui-draggable .wpcf-form-fieldset .wpcf-form-fieldset legend {

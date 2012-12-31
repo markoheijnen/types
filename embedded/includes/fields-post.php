@@ -117,6 +117,15 @@ function wpcf_admin_post_init($post = false) {
  * @param type $group 
  */
 function wpcf_admin_post_meta_box($post, $group) {
+
+    static $nonce_added = false;
+    
+    if (!$nonce_added) {
+        $nonce_action = 'update-' . $post->post_type . '_' . $post->ID;
+        wp_nonce_field($nonce_action, '_wpcf_post_wpnonce');
+        $nonce_added = true;
+    }
+
     if (!empty($group['args']['_conditional_display'])) {
         if ($group['args']['_conditional_display'] == 'failed') {
             echo '<div class="wpcf-cd-group wpcf-cd-group-failed" style="display:none;">';
@@ -178,7 +187,7 @@ function wpcf_admin_post_meta_box($post, $group) {
  * @param type $post 
  */
 function wpcf_admin_post_save_post_hook($post_ID, $post) {
-    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'],
+    if (!isset($_POST['_wpcf_post_wpnonce']) || !wp_verify_nonce($_POST['_wpcf_post_wpnonce'],
                     'update-' . $post->post_type . '_' . $post_ID)) {
         return false;
     }

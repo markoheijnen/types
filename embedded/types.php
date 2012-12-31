@@ -14,7 +14,8 @@ if (!defined('WPCF_DEBUG')) {
 if (!defined('ICL_COMMON_FUNCTIONS')) {
     require_once WPCF_EMBEDDED_ABSPATH . '/common/functions.php';
 }
-require_once WPCF_EMBEDDED_INC_ABSPATH . '/footer-credit.php';
+// TODO Remove
+//require_once WPCF_EMBEDDED_INC_ABSPATH . '/footer-credit.php';
 
 wpcf_embedded_after_setup_theme_hook();
 
@@ -52,7 +53,7 @@ function wpcf_embedded_init() {
 
     // Define necessary constants if plugin is not present
     if (!defined('WPCF_VERSION')) {
-        define('WPCF_VERSION', '1.1.3');
+        define('WPCF_VERSION', '1.1.3.3');
         define('WPCF_META_PREFIX', 'wpcf-');
         define('WPCF_EMBEDDED_RELPATH', icl_get_file_relpath(__FILE__));
     } else {
@@ -406,12 +407,17 @@ function types_child_posts($post_type, $args = array()) {
             if (!empty($group['fields'])) {
                 // Process fields
                 foreach ($group['fields'] as $k => $field) {
-                    $child_posts[$child_post_key]->fields[$k] = get_post_meta($child_post->ID,
-                            wpcf_types_get_meta_prefix($field) . $field['slug'],
-                            false /*true*/); // get all field instances
+                    if (isset($field['data']['repetitive'])&&$field['data']['repetitive'])
+                        $child_posts[$child_post_key]->fields[$k] = get_post_meta($child_post->ID,
+                                wpcf_types_get_meta_prefix($field) . $field['slug'],
+                                false); // get all field instances
+                    else
+                        $child_posts[$child_post_key]->fields[$k] = get_post_meta($child_post->ID,
+                                wpcf_types_get_meta_prefix($field) . $field['slug'],
+                                true); // get single field instance
                     // handle checkboxes which are one value serialized
-                    if ($field['type']=='checkboxes' && isset($child_posts[$child_post_key]->fields[$k][0]))
-                        $child_posts[$child_post_key]->fields[$k]=maybe_unserialize($child_posts[$child_post_key]->fields[$k][0]);
+                    if ($field['type']=='checkboxes' && isset($child_posts[$child_post_key]->fields[$k]))
+                        $child_posts[$child_post_key]->fields[$k]=maybe_unserialize($child_posts[$child_post_key]->fields[$k]);
                 }
             }
         }
@@ -467,4 +473,22 @@ function wpcf_admin_is_repetitive($field) {
     $check = intval($field['data']['repetitive']);
     return !empty($check)
             && wpcf_admin_can_be_repetitive($field['type']);
+}
+
+/**
+ * Returns unique ID.
+ * 
+ * @staticvar array $cache
+ * @param type $cache_key
+ * @return type 
+ */
+function wpcf_unique_id($cache_key) {
+    $cache_key = md5(strval($cache_key) . strval(time()));
+    static $cache = array();
+    if (!isset($cache[$cache_key])) {
+        $cache[$cache_key] = 1;
+    } else {
+        $cache[$cache_key] += 1;
+    }
+    return $cache_key . '-' . $cache[$cache_key];
 }
