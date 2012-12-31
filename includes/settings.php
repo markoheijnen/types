@@ -96,17 +96,18 @@ function wpcf_admin_general_settings_form() {
             '#after' => '<br />',
         );
     }
-    $show_credits = get_option('wpcf_footer_credit', array());
-    $form['credits'] = array(
-        '#id' => 'show_credits',
-        '#name' => 'show_credits',
-        '#type' => 'checkbox',
-        '#title' => __('Display Types footer credits', 'wpcf'),
-        '#description' => __("Show your support to Types, by telling people that you're using it. We'll add a small footer that tells just about Types.",
-                'wpcf'),
-        '#inline' => true,
-        '#default_value' => !empty($show_credits['active']),
-    );
+    // TODO Remove
+//    $show_credits = get_option('wpcf_footer_credit', array());
+//    $form['credits'] = array(
+//        '#id' => 'show_credits',
+//        '#name' => 'show_credits',
+//        '#type' => 'checkbox',
+//        '#title' => __('Display Types footer credits', 'wpcf'),
+//        '#description' => __("Show your support to Types, by telling people that you're using it. We'll add a small footer that tells just about Types.",
+//                'wpcf'),
+//        '#inline' => true,
+//        '#default_value' => !empty($show_credits['active']),
+//    );
     $form['help-box'] = array(
         '#id' => 'help_box',
         '#name' => 'wpcf_settings[help_box]',
@@ -191,20 +192,21 @@ function wpcf_admin_general_settings_form_submit($form) {
     update_option('wpcf_settings', $settings);
 
     // Credits
-    require_once WPCF_EMBEDDED_INC_ABSPATH . '/footer-credit.php';
-    $option = get_option('wpcf_footer_credit', array());
-    if (!isset($option['message'])) {
-        $data = wpcf_footer_credit_defaults();
-        shuffle($data);
-        $option['message'] = rand(0, count($data));
-    }
-    if (!isset($_POST['show_credits'])) {
-        update_option('wpcf_footer_credit',
-                array('active' => 0, 'message' => $option['message']));
-    } else {
-        update_option('wpcf_footer_credit',
-                array('active' => 1, 'message' => $option['message']));
-    }
+    // TODO Remove
+//    require_once WPCF_EMBEDDED_INC_ABSPATH . '/footer-credit.php';
+//    $option = get_option('wpcf_footer_credit', array());
+//    if (!isset($option['message'])) {
+//        $data = wpcf_footer_credit_defaults();
+//        shuffle($data);
+//        $option['message'] = rand(0, count($data));
+//    }
+//    if (!isset($_POST['show_credits'])) {
+//        update_option('wpcf_footer_credit',
+//                array('active' => 0, 'message' => $option['message']));
+//    } else {
+//        update_option('wpcf_footer_credit',
+//                array('active' => 1, 'message' => $option['message']));
+//    }
 
     wpcf_admin_message_store(__('Settings saved', 'wpcf'));
 }

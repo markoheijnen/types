@@ -5,14 +5,14 @@
   Description: Define custom post types, custom taxonomy and custom fields.
   Author: ICanLocalize
   Author URI: http://wp-types.com
-  Version: 1.1.3
+  Version: 1.1.3.3
  */
 // Added check because of activation hook and theme embedded code
 if (!defined('WPCF_VERSION')) {
-    define('WPCF_VERSION', '1.1.3');
+    define('WPCF_VERSION', '1.1.3.3');
 }
 
-define('WPCF_REPOSITORY','http://api.wp-types.com/');
+define('WPCF_REPOSITORY', 'http://api.wp-types.com/');
 
 define('WPCF_ABSPATH', dirname(__FILE__));
 define('WPCF_RELPATH', plugins_url() . '/' . basename(WPCF_ABSPATH));
@@ -46,13 +46,28 @@ function wpcf_init() {
 
 /**
  * Include embedded code if not used in theme.
+ * 
+ * add_action('after_setup_theme', 'wpcf_init_embedded_code', 999);
+ * 'after_setup_theme' hook is performed just before 'init' hook.
  */
 function wpcf_init_embedded_code() {
-    if (!defined('WPCF_EMBEDDED_ABSPATH')) {
+    if (!defined('WPCF_RUNNING_EMBEDDED')) {
         require_once WPCF_ABSPATH . '/embedded/types.php';
+
+        // TODO Monitor this
+        // Reviewed
+        // Not sure why earlier we did not always forced 'init' hook
+        // Maybe there was some reason but may not be obstacle anymore
+        // Check if it runs OK with embedded code
+        //
+        // PROPOSAL
+        //add_action('init', 'wpcf_embedded_init');
         wpcf_embedded_init();
     } else {// Added because if plugin is active - theme embedded code won't fire
         require_once WPCF_EMBEDDED_ABSPATH . '/types.php';
+        //
+        // PROPOSAL
+        //add_action('init', 'wpcf_embedded_init');
         wpcf_embedded_init();
     }
 }
@@ -210,120 +225,11 @@ function wpcf_reserved_names() {
     return apply_filters('wpcf_reserved_names', $reserved);
 }
 
-/**
- * Returns unique ID.
- * 
- * @staticvar array $cache
- * @param type $cache_key
- * @return type 
- */
-function wpcf_unique_id($cache_key) {
-    $cache_key = md5(strval($cache_key) . strval(time()));
-    static $cache = array();
-    if (!isset($cache[$cache_key])) {
-        $cache[$cache_key] = 1;
-    } else {
-        $cache[$cache_key] += 1;
-    }
-    return $cache_key . '-' . $cache[$cache_key];
+add_action('icl_pro_translation_saved', 'wpcf_fix_translated_post_relationships');
+
+function wpcf_fix_translated_post_relationships($post_id) {
+    require_once WPCF_EMBEDDED_ABSPATH . '/includes/post-relationship.php';
+    wpcf_post_relationship_set_translated_parent($post_id);
+    wpcf_post_relationship_set_translated_children($post_id);
 }
 
-/**
- * i18n friendly version of basename(), copy from wp-includes/formatting.php to solve bug with windows
- *
- * @since 3.1.0
- *
- * @param string $path A path.
- * @param string $suffix If the filename ends in suffix this will also be cut off.
- * @return string
- */
-function wpcf_basename( $path, $suffix = '' ) {
-    return urldecode( basename( str_replace( array( '%2F', '%5C' ), '/', urlencode( $path ) ), $suffix ) ); 
-}
-
-/**
- * Copy from wp-includes/media.php
- * Scale down an image to fit a particular size and save a new copy of the image.
- *
- * The PNG transparency will be preserved using the function, as well as the
- * image type. If the file going in is PNG, then the resized image is going to
- * be PNG. The only supported image types are PNG, GIF, and JPEG.
- *
- * Some functionality requires API to exist, so some PHP version may lose out
- * support. This is not the fault of WordPress (where functionality is
- * downgraded, not actual defects), but of your PHP version.
- *
- * @since 2.5.0
- *
- * @param string $file Image file path.
- * @param int $max_w Maximum width to resize to.
- * @param int $max_h Maximum height to resize to.
- * @param bool $crop Optional. Whether to crop image or resize.
- * @param string $suffix Optional. File suffix.
- * @param string $dest_path Optional. New image file path.
- * @param int $jpeg_quality Optional, default is 90. Image quality percentage.
- * @return mixed WP_Error on failure. String with new destination path.
- */
-function wpcf_image_resize( $file, $max_w, $max_h, $crop = false, $suffix = null, $dest_path = null, $jpeg_quality = 90 ) {
-
-	$image = wp_load_image( $file );
-	if ( !is_resource( $image ) )
-		return new WP_Error( 'error_loading_image', $image, $file );
-
-	$size = @getimagesize( $file );
-	if ( !$size )
-		return new WP_Error('invalid_image', __('Could not read image size'), $file);
-	list($orig_w, $orig_h, $orig_type) = $size;
-
-	$dims = image_resize_dimensions($orig_w, $orig_h, $max_w, $max_h, $crop);
-	if ( !$dims )
-		return new WP_Error( 'error_getting_dimensions', __('Could not calculate resized image dimensions') );
-	list($dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h) = $dims;
-
-	$newimage = wp_imagecreatetruecolor( $dst_w, $dst_h );
-
-	imagecopyresampled( $newimage, $image, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
-
-	// convert from full colors to index colors, like original PNG.
-	if ( IMAGETYPE_PNG == $orig_type && function_exists('imageistruecolor') && !imageistruecolor( $image ) )
-		imagetruecolortopalette( $newimage, false, imagecolorstotal( $image ) );
-
-	// we don't need the original in memory anymore
-	imagedestroy( $image );
-
-	// $suffix will be appended to the destination filename, just before the extension
-	if ( !$suffix )
-		$suffix = "{$dst_w}x{$dst_h}";
-
-	$info = pathinfo($file);
-	$dir = $info['dirname'];
-	$ext = $info['extension'];
-	$name = wpcf_basename($file, ".$ext"); // use fix here for windows
-
-	if ( !is_null($dest_path) and $_dest_path = realpath($dest_path) )
-		$dir = $_dest_path;
-	$destfilename = "{$dir}/{$name}-{$suffix}.{$ext}";
-
-	if ( IMAGETYPE_GIF == $orig_type ) {
-		if ( !imagegif( $newimage, $destfilename ) )
-			return new WP_Error('resize_path_invalid', __( 'Resize path invalid' ));
-	} elseif ( IMAGETYPE_PNG == $orig_type ) {
-		if ( !imagepng( $newimage, $destfilename ) )
-			return new WP_Error('resize_path_invalid', __( 'Resize path invalid' ));
-	} else {
-		// all other formats are converted to jpg
-		if ( 'jpg' != $ext && 'jpeg' != $ext )
-			$destfilename = "{$dir}/{$name}-{$suffix}.jpg";
-		if ( !imagejpeg( $newimage, $destfilename, apply_filters( 'jpeg_quality', $jpeg_quality, 'image_resize' ) ) )
-			return new WP_Error('resize_path_invalid', __( 'Resize path invalid' ));
-	}
-
-	imagedestroy( $newimage );
-
-	// Set correct file permissions
-	$stat = stat( dirname( $destfilename ));
-	$perms = $stat['mode'] & 0000666; //same permissions as parent folder, strip off the executable bits
-	@ chmod( $destfilename, $perms );
-
-	return $destfilename;
-}
