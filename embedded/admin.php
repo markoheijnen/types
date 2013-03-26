@@ -183,8 +183,7 @@ function wpcf_form_popup_add_optional( $form ) {
         '#type' => 'markup',
         '#markup' => '<br clear="both" /><a href="#" onclick="' . $onclick
         . '" class="wpcf-editor-popup-advanced-link">'
-        . __( 'Advanced',
-                'wpcf' ) . ' &raquo;</a><br /><div id="wpcf-popup-optionals" style="margin-left:20px;display:none">',
+        . __( 'Advanced', 'wpcf' ) . ' &raquo;</a><br /><div id="wpcf-popup-optionals" style="margin-left:20px;display:none">',
     );
 
     $form['show_name'] = array(
@@ -419,7 +418,7 @@ function wpcf_show_admin_messages() {
     $messages = get_option( 'wpcf-messages', array() );
     $messages_for_user = isset( $messages[get_current_user_id()] ) ? $messages[get_current_user_id()] : array();
     $dismissed = get_option( 'wpcf_dismissed_messages', array() );
-    if ( !empty( $messages_for_user ) ) {
+    if ( !empty( $messages_for_user ) && is_array( $messages_for_user ) ) {
         foreach ( $messages_for_user as $message_id => $message ) {
             if ( !in_array( $message['keep_id'], $dismissed ) ) {
                 wpcf_admin_message( $message['message'], $message['class'] );

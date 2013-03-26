@@ -5,7 +5,7 @@ Tags: CMS, custom field, custom fields, custom post type, custom post types, pos
 License: GPLv2
 Requires at least: 3.1
 Tested up to: 3.5.1
-Stable tag: 1.2
+Stable tag: 1.2.1
 
 The complete and reliable plugin for managing custom post types, custom taxonomy and custom fields.
 
@@ -20,11 +20,11 @@ If you're an experienced PHP developer, you'll appreciate Types comprehensive [P
 
 Types and the other [Toolset](http://wp-types.com) plugins let you build complete sites without coding.
 
-* [Views](http://wp-types.com/home/views-create-elegant-displays-for-your-content/) - a powerful content display engine
-* [CRED](http://wp-types.com/home/cred/) - front-end form builder for content creation and editing
-* [Access](http://wp-types.com/home/types-access/) - roles and access control management
+* **[Views](http://wp-types.com/home/views-create-elegant-displays-for-your-content/)** - a powerful content display engine
+* **[CRED](http://wp-types.com/home/cred/)** - front-end form builder for content creation and editing
+* **[Access](http://wp-types.com/home/types-access/)** - roles and access control management
 
-The [Toolset](http://wp-types.com) package will let you build powerful WordPress sites right from within the admin dashboard, without any PHP.
+The [Toolset](http://wp-types.com) package will let you build complete WordPress sites right from within the admin dashboard, without any PHP.
 
 = RELIABLE SUPPORT =
 To get support for Types, please join our [technical support forum](http://wp-types.com/forums/). You will receive support directly from our developers, helping you deliver great sites on time and correctly.
@@ -135,6 +135,17 @@ Additionally, Types is the only plugin that lets you define parent/child relatio
 5. Bulk editing child content using Field Tables
 
 == Changelog ==
+
+= 1.2.1 =
+* Fixed compatibility with ACF, Events Calendar and a number of other plugins due to removed actions
+* Fixed a problem with WooCommerce Extensions, due to too late initialization
+* Fixed translations
+* Fixed a problem with stypes_child_posts function on updates
+* Fixed a problem with Types API for field render
+* Fixed a problem with conditional fields and wpv_condition
+* Fixed a bug with repeating fields in translated content
+* Fixed a problem with many-to-many relationship
+* Fixed a bug with fields inserted into the wrond WYSIWYG field
 
 = 1.2 =
 * Added allowing ordering of repeater fields
@@ -298,3 +309,6 @@ Fix adding child posts for WordPress 3.5
 
 = 1.2 =
 Drag and Drop ordering of repeating fields
+
+= 1.2.1 =
+Just bug fixes. Usermeta fields are coming in Types 1.3!

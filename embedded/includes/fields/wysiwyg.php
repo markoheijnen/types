@@ -1,5 +1,5 @@
 <?php
-if (wpcf_compare_wp_version('3.3', '<')) {
+if ( wpcf_compare_wp_version( '3.3', '<' ) ) {
     return false;
 }
 
@@ -11,8 +11,8 @@ if (wpcf_compare_wp_version('3.3', '<')) {
 function wpcf_fields_wysiwyg() {
     $settings = array(
         'id' => 'wpcf-wysiwyg',
-        'title' => __('WYSIWYG', 'wpcf'),
-        'description' => __('WYSIWYG editor', 'wpcf'),
+        'title' => __( 'WYSIWYG', 'wpcf' ),
+        'description' => __( 'WYSIWYG editor', 'wpcf' ),
         'meta_box_css' => array(
             'wpcf-fields-wysiwyg' => array(
                 'inline' => 'wpcf_fields_wysiwyg_css',
@@ -29,12 +29,12 @@ function wpcf_fields_wysiwyg() {
  * @param type $field
  * @return array 
  */
-function wpcf_fields_wysiwyg_meta_box_form($field) {
+function wpcf_fields_wysiwyg_meta_box_form( $field ) {
     $set = array(
         'wpautop' => true, // use wpautop?
         'media_buttons' => true, // show insert/upload button(s)
         'textarea_name' => 'wpcf[' . $field['id'] . ']', // set the textarea name to something different, square brackets [] can be used here
-        'textarea_rows' => get_option('default_post_edit_rows', 10), // rows="..."
+        'textarea_rows' => get_option( 'default_post_edit_rows', 10 ), // rows="..."
         'tabindex' => '',
         'editor_css' => '', // intended for extra styles for both visual and HTML editors buttons, needs to include the <style> tags, can use "scoped".
         'editor_class' => 'wpcf-wysiwyg', // add extra class(es) to the editor textarea
@@ -90,7 +90,7 @@ function wpcf_fields_wysiwyg_css() {
         }
         <?php
 // WP 3.3 changes
-        if (version_compare($wp_version, '3.2.1', '<=')) {
+        if ( version_compare( $wp_version, '3.2.1', '<=' ) ) {
 
             ?>
             .wpcf-wysiwyg .mceResize {
@@ -110,21 +110,21 @@ function wpcf_fields_wysiwyg_css() {
  * @param type $params
  * @return type 
  */
-function wpcf_fields_wysiwyg_view($params) {
+function wpcf_fields_wysiwyg_view( $params ) {
     $output = '';
-    if (!empty($params['style']) || !empty($params['class'])) {
+    if ( !empty( $params['style'] ) || !empty( $params['class'] ) ) {
         $output .= '<div';
-        if (!empty($params['style'])) {
+        if ( !empty( $params['style'] ) ) {
             $output .= ' style="' . $params['style'] . '"';
         }
-        if (!empty($params['class'])) {
+        if ( !empty( $params['class'] ) ) {
             $output .= ' class="' . $params['class'] . '"';
         }
         $output .= '>';
     }
-    $output .= apply_filters('the_content',
-            htmlspecialchars_decode(stripslashes($params['field_value'])));
-    if (!empty($params['style']) || !empty($params['class'])) {
+    $output .= apply_filters( 'the_content',
+            htmlspecialchars_decode( stripslashes( $params['field_value'] ) ) );
+    if ( !empty( $params['style'] ) || !empty( $params['class'] ) ) {
         $output .= '</div>';
     }
     return $output;

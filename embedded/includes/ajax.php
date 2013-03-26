@@ -47,6 +47,10 @@ function wpcf_ajax_embedded() {
             if ( isset( $_GET['post_id'] )
                     && isset( $_GET['post_type_child'] )
                     && isset( $_GET['post_type_parent'] ) ) {
+
+                // Fix for Common Conditional check
+                $_POST['post_ID'] = $_GET['post_id'];
+
                 $relationships = get_option( 'wpcf_post_relationship', array() );
                 $post = get_post( intval( $_GET['post_id'] ) );
                 if ( !empty( $post->ID ) ) {
@@ -100,6 +104,9 @@ function wpcf_ajax_embedded() {
         case 'pr_save_all':
             $output = '';
             if ( isset( $_POST['post_id'] ) ) {
+                // Fix for Common Conditional check
+                $_POST['post_ID'] = $_POST['post_id'];
+
                 $parent_id = intval( $_POST['post_id'] );
                 if ( isset( $_POST['wpcf_post_relationship'][$parent_id] ) ) {
                     $wpcf->relationship->save_children( $parent_id,
@@ -124,6 +131,10 @@ function wpcf_ajax_embedded() {
                     && isset( $_GET['post_type_parent'] )
                     && isset( $_GET['post_type_child'] )
                     && isset( $_POST['wpcf_post_relationship'] ) ) {
+
+                // Fix for Common Conditional check
+                $_POST['post_ID'] = $_POST['post_id'];
+
                 $parent_id = intval( $_GET['parent_id'] );
                 $child_id = intval( $_GET['post_id'] );
                 $parent_post_type = strval( $_GET['post_type_parent'] );
@@ -327,6 +338,8 @@ function wpcf_ajax_embedded() {
                 $post_id = key( $_data );
                 $post = get_post( $post_id );
                 $fields = $_data[$post_id];
+                // Force
+                $_POST['post_ID'] = $post_id;
 
                 /*
                  * TODO This is temporary fix. Find better way to get fields
@@ -334,8 +347,9 @@ function wpcf_ajax_embedded() {
                  */
                 $_all_fields = wpcf_admin_fields_get_fields();
                 foreach ( $_all_fields as $_field ) {
-                    if ( !isset( $fields[$_field['slug']] ) ) {
-                        $fields[$_field['slug']] = null;
+                    $_slug = WPCF_META_PREFIX . $_field['slug'];
+                    if ( !isset( $fields[$_slug] ) ) {
+                        $fields[$_slug] = null;
                     }
                 }
 
@@ -406,6 +420,8 @@ function wpcf_ajax_embedded() {
                 if ( !empty( $wpcf->conditional->cf['data']['conditional_display']['conditions'] ) ) {
 
                     if ( $_flag_relationship ) {
+                        // Set context
+                        $wpcf->conditional->context = 'relationship';
                         /*
                          * We need parent and child
                          */
@@ -418,7 +434,7 @@ function wpcf_ajax_embedded() {
                             $wpcf->relationship->cf->set( $post, $field_id );
                             $_child = $wpcf->relationship->get_child();
                             $_child->form->cf->set( $post, $field_id );
-                            $_relationship_name = $_child->form->alter_form_name( 'wpcf[' . $wpcf->conditional->cf['id'] );
+                            $_relationship_name = $_child->form->alter_form_name( 'wpcf[' . $wpcf->conditional->cf['id'] .']' );
                         }
 
                         if ( !$_relationship_name ) {
@@ -430,7 +446,7 @@ function wpcf_ajax_embedded() {
 
                         $name = $_relationship_name;
                     } else {
-                        $name = 'wpcf[' . $wpcf->conditional->cf['id'];
+                        $name = 'wpcf[' . $wpcf->conditional->cf['id'] .']';
                     }
 
                     /*

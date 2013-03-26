@@ -79,13 +79,15 @@ class WPCF_Conditional extends WPCF_Field
     function __construct() {
         parent::__construct();
         $fields = new WPCF_Fields();
-        foreach ( $fields->fields->all as $f_id => $f ) {
-            if ( !empty( $f['data']['conditional_display']['conditions'] ) ) {
-                foreach ( $f['data']['conditional_display']['conditions'] as
-                            $condition ) {
-                    $this->collected[$f_id][] = $condition;
-                    if ( !empty( $condition['field'] ) ) {
-                        $this->triggers[$condition['field']][$f_id][] = $condition;
+        if ( is_array( $fields->fields->all ) ) {
+            foreach ( $fields->fields->all as $f_id => $f ) {
+                if ( !empty( $f['data']['conditional_display']['conditions'] ) ) {
+                    foreach ( $f['data']['conditional_display']['conditions'] as
+                                $condition ) {
+                        $this->collected[$f_id][] = $condition;
+                        if ( !empty( $condition['field'] ) ) {
+                            $this->triggers[$condition['field']][$f_id][] = $condition;
+                        }
                     }
                 }
             }

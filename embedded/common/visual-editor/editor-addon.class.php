@@ -595,11 +595,20 @@ if (!class_exists('Editor_addon')) {
 
                             }
                         }else{
-                            window.parent.tinyMCE.activeEditor.execCommand('mceInsertContent', false, '<?php echo $shortcode; ?>');
+                            /*
+                             * TinyMCE visual editor
+                             * 
+                             * Since 1.2.1 We use instance
+                             */
+                            var tinyMCEinstance = window.parent.tinyMCE.get(window.parent.wpcfActiveEditor);
+                            tinyMCEinstance.execCommand('mceInsertContent', false, '<?php echo $shortcode; ?>');
+                            /*
+                             * TinyMCE visual editor
+                             * Using mceFocus we change active editor to current
+                             */
+                            //                            window.parent.tinyMCE.execCommand('mceFocus', false, window.parent.wpcfActiveEditor);
+                            //                            window.parent.tinyMCE.activeEditor.execCommand('mceInsertContent', false, '<?php echo $shortcode; ?>');
                         }
-                        // Visual editor
-                        //window.parent.tinyMCE.execCommand('mceFocus', false, window.parent.wpcfActiveEditor);
-                        //window.parent.tinyMCE.activeEditor.execCommand('mceInsertContent', false, '<?php echo $shortcode; ?>');
                     }
                 } else if (window.parent.wpcfInsertMetaHTML == false) {
                     
@@ -617,7 +626,19 @@ if (!class_exists('Editor_addon')) {
 
                             }
                         }else{
-                            window.parent.tinyMCE.activeEditor.execCommand('mceInsertContent', false, '<?php echo $shortcode; ?>');
+                            /*
+                             * TinyMCE visual editor
+                             * 
+                             * Since 1.2.1 We use instance
+                             */
+                            var tinyMCEinstance = window.parent.tinyMCE.get(window.parent.wpcfActiveEditor);
+                            tinyMCEinstance.execCommand('mceInsertContent', false, '<?php echo $shortcode; ?>');
+                            /*
+                             * TinyMCE visual editor
+                             * Using mceFocus we change active editor to current
+                             */
+                            //                            window.parent.tinyMCE.execCommand('mceFocus', false, window.parent.wpcfActiveEditor);
+                            //                            window.parent.tinyMCE.activeEditor.execCommand('mceInsertContent', false, '<?php echo $shortcode; ?>');
                         }
                     }
                 } else {

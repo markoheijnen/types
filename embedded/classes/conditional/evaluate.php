@@ -85,9 +85,15 @@ class WPCF_Evaluate
              * Filter meta values (switch them with $_POST values)
              * Used by Views, Types do not need it.
              */
-            add_filter( 'get_post_metadata',
-                    'wpcf_cd_meta_ajax_validation_filter', 10, 4 );
 
+            if ( $o->context == 'relationship' ) {
+                add_filter( 'get_post_metadata',
+                        'wpcf_relationship_custom_statement_meta_ajax_validation_filter',
+                        10, 4 );
+            } else {
+                add_filter( 'get_post_metadata',
+                        'wpcf_cd_meta_ajax_validation_filter', 10, 4 );
+            }
             /*
              * 
              * Set statement
@@ -161,8 +167,14 @@ class WPCF_Evaluate
              * 
              * Remove filter meta values
              */
-            remove_filter( 'get_post_metadata',
-                    'wpcf_cd_meta_ajax_validation_filter', 10, 4 );
+            if ( $o->context == 'relationship' ) {
+                remove_filter( 'get_post_metadata',
+                        'wpcf_relationship_custom_statement_meta_ajax_validation_filter',
+                        10, 4 );
+            } else {
+                remove_filter( 'get_post_metadata',
+                        'wpcf_cd_meta_ajax_validation_filter', 10, 4 );
+            }
         } else {
             /*
              * 

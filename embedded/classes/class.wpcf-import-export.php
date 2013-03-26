@@ -16,25 +16,58 @@
 class WPCF_Import_Export
 {
 
+    /**
+     * Meta keys that are used to generate checksum.
+     * 
+     * @var type 
+     */
+    var $group_meta_keys = array(
+        '_wp_types_group_terms',
+        '_wp_types_group_post_types',
+        '_wp_types_group_fields',
+        '_wp_types_group_templates',
+        '_wpcf_conditional_display',
+    );
+    
+    /**
+     * Restricted data - ommited from checksum, applies to all content types.
+     * 
+     * @var type 
+     */
+    var $_remove_data_keys = array('id', 'ID', 'menu_icon', 'wpml_action',
+        'wpcf-post-type', 'wpcf-tax', 'hash', 'checksum');
+
+    /**
+     * Required Group meta keys
+     * 
+     * @todo Make sure only this is used to fetch required meta_keys
+     * @return type
+     */
     function get_group_meta_keys() {
-        return array(
-            '_wp_types_group_terms',
-            '_wp_types_group_post_types',
-            '_wp_types_group_fields',
-            '_wp_types_group_templates',
-            '_wpcf_conditional_display',
-        );
+        return $this->group_meta_keys;
     }
 
+    /**
+     * Fetches required meta ny meta_key
+     * 
+     * @param type $group_id
+     * @return type
+     */
     function get_group_meta( $group_id ) {
-        $meta = get_post_custom( $group_id );
+
         $_meta = array();
-        if ( !empty( $meta ) ) {
-            foreach ( $meta as $meta_key => $meta_value ) {
-                if ( in_array( $meta_key, $this->get_group_meta_keys()
-                        )
-                ) {
-                    $_meta[$meta_key] = $meta_value[0];
+        $group = wpcf_admin_fields_get_group( $group_id );
+        
+        if ( !empty( $group ) ) {
+            $meta = get_post_custom( $group['id'] );
+
+            if ( !empty( $meta ) ) {
+                foreach ( $meta as $meta_key => $meta_value ) {
+                    if ( in_array( $meta_key, $this->group_meta_keys
+                            )
+                    ) {
+                        $_meta[$meta_key] = $meta_value[0];
+                    }
                 }
             }
         }
@@ -42,6 +75,13 @@ class WPCF_Import_Export
         return $_meta;
     }
 
+    /**
+     * Generates checksums for defined content types.
+     * 
+     * @param type $type
+     * @param type $item_id
+     * @return type
+     */
     function generate_checksum( $type, $item_id = null ) {
         switch ( $type ) {
             case 'group':
@@ -69,36 +109,38 @@ class WPCF_Import_Export
                 break;
         }
 
+        // Unset various not wanted data
+        foreach ( $this->_remove_data_keys as $key ) {
+            if ( isset( $checksum[$key] ) ) {
+                unset( $checksum[$key] );
+            }
+        }
+
         return md5( maybe_serialize( $checksum ) );
     }
 
+    /**
+     * Generates and compares checksums.
+     * 
+     * @param type $type
+     * @param type $item_id
+     * @param type $import_checksum Imported checksum
+     * @return type
+     */
     function checksum( $type, $item_id, $import_checksum ) {
-        $checksum = '__not__';
-        switch ( $type ) {
-            case 'group':
-                $checksum = $this->generate_checksum( $this->get_group_meta( $item_id ) );
-                break;
-
-            case 'field':
-                $checksum = $this->generate_checksum( wpcf_admin_fields_get_field( $item_id ) );
-                break;
-
-            case 'custom_post_type':
-                $checksum = $this->generate_checksum( 'custom_post_type',
-                        $item_id );
-                break;
-
-            case 'custom_taxonomy':
-                $checksum = $this->generate_checksum( 'custom_taxonomy',
-                        $item_id );
-                break;
-
-            default:
-                break;
-        }
+        // Generate checksum of installed content
+        $checksum = $this->generate_checksum( $type, $item_id );
+        // Compare
         return $checksum == strval( $import_checksum );
     }
 
+    /**
+     * Checks if item exists.
+     * 
+     * @param type $type
+     * @param type $item_id
+     * @return boolean
+     */
     function item_exists( $type, $item_id ) {
         switch ( $type ) {
             case 'group':
@@ -121,7 +163,7 @@ class WPCF_Import_Export
                 return false;
                 break;
         }
-        return empty( $check );
+        return !empty( $check );
     }
 
 }

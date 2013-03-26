@@ -173,7 +173,7 @@ function types_render_field( $field_id, $params, $content = null, $code = '' ) {
 
     // API filter
     $wpcf->field->set( $post, $field );
-    return $wpcf->field->html( $html );
+    return $wpcf->field->html( $html, $params );
 }
 
 /**

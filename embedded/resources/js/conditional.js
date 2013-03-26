@@ -311,8 +311,10 @@ function wpcfConditionalIsHidden(object) {
      */
     if (object.parents('.wpcf-conditional').length > 0
         && object.parents('.inside').is(':hidden')) {
+        if (object.parents('.wpcf-conditional').css('display') == 'none') {
+            return true;
+        }
         object.parents('.handlediv').trigger('click');
-//        return object.delay(500).is(':hidden');
         return false;
     } else {
         return object.parents('.wpcf-conditional').length > 0 && object.is(':hidden');

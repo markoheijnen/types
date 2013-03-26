@@ -243,6 +243,12 @@ class WPCF_Relationship_Child_Form
             // Set title
             $row[] = $this->title();
             $this->headers[] = '_wp_title';
+
+            // Set body if needed
+            if ( $this->data['fields_setting'] == 'all_cf_standard' ) {
+                $this->headers[] = '_wp_body';
+                $row[] = $this->body();
+            }
             /*
              * Loop over groups and fields
              */
@@ -263,6 +269,22 @@ class WPCF_Relationship_Child_Form
                     $this->_field_triggers();
                     // Add to header{
                     $this->headers[] = $field_key;
+                }
+            }
+
+            // Add parent forms
+            if ( $this->data['fields_setting'] == 'all_cf' ) {
+                $this->data['fields']['_wpcf_pr_parents'] = wpcf_pr_admin_get_belongs( $this->child_post_type );
+                if ( !empty( $this->data['fields']['_wpcf_pr_parents'] ) ) {
+                    $_temp = (array) $this->data['fields']['_wpcf_pr_parents'];
+                    foreach ( $_temp as $_parent => $_true ) {
+                        if ( $_parent == $this->parent_post_type ) {
+                            continue;
+                        }
+                        $row[] = $this->_parent_form( $_parent );
+                        // Add to header
+                        $this->headers['__parents'][$_parent] = $_true;
+                    }
                 }
             }
         }

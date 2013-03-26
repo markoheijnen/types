@@ -389,10 +389,10 @@ class WPCF_Field
         $file = WPCF_EMBEDDED_INC_ABSPATH . '/fields/' . $this->cf['type'] . '.php';
         if ( file_exists( $file ) ) {
             include_once $file;
-            $func = 'wpcf_fields_' . $this->cf['type'];
-            if ( is_callable( $func ) ) {
-                return (object) call_user_func( $func );
-            }
+        }
+        $func = 'wpcf_fields_' . $this->cf['type'];
+        if ( is_callable( $func ) ) {
+            return (object) call_user_func( $func );
         }
         return new stdClass();
     }
@@ -419,7 +419,14 @@ class WPCF_Field
      */
     function _get_meta_form( $meta_value = null, $meta_id = null, $wrap = true ) {
 
-        include_once WPCF_EMBEDDED_INC_ABSPATH . '/fields/' . $this->cf['type'] . '.php';
+        /*
+         * Note that field may be registered outside of Types.
+         * In that case, it's on developer to make sure it's loaded.
+         */
+        $_file = WPCF_EMBEDDED_INC_ABSPATH . '/fields/' . $this->cf['type'] . '.php';
+        if ( file_exists( $_file ) ) {
+            include_once WPCF_EMBEDDED_INC_ABSPATH . '/fields/' . $this->cf['type'] . '.php';
+        }
 
         /*
          * Set value
@@ -457,8 +464,8 @@ class WPCF_Field
         if ( isset( $this->config->inherited_field_type ) ) {
             if ( !array_key_exists( $this->cf['type'],
                             $this->_deprecated_inherited_allowed() ) ) {
-                _deprecated_argument( 'inherited_field_type', '1.2',
-                        'Since Types 1.2 we encourage developers to completely define fields' );
+//                _deprecated_argument( 'inherited_field_type', '1.2',
+//                        'Since Types 1.2 we encourage developers to completely define fields' );
             }
             $file = WPCF_EMBEDDED_INC_ABSPATH . '/fields/'
                     . $this->config->inherited_field_type
@@ -509,7 +516,7 @@ class WPCF_Field
             }
 
             // Merge
-            $form = $form + $form_meta_box;
+            $form = array_merge( $form, $form_meta_box );
         }
 
         if ( !empty( $form ) ) {
@@ -530,11 +537,14 @@ class WPCF_Field
                 // Add title and description
                 // TODO WPML
                 if ( empty( $started ) ) {
+                    $_title = isset( $element['#title'] ) ? $element['#title'] : $this->cf['name'];
                     $element['#title'] = wpcf_translate( 'field '
-                            . $this->cf['id'] . ' name', $this->cf['name'] );
+                            . $this->cf['id'] . ' name', $_title );
+
+                    $_description = isset( $element['#description'] ) ? $element['#description'] : $this->cf['description'];
                     $element['#description'] = wpautop( wpcf_translate( 'field '
                                     . $this->cf['id'] . ' description',
-                                    $this->cf['description'] ) );
+                                    $_description ) );
                     $started = true;
                 }
 
@@ -628,7 +638,16 @@ class WPCF_Field
      * 
      * @param type $output 
      */
-    function html( $html ) {
+    function html( $html, $params ) {
+        /*
+         * 
+         * Exception when RAW
+         */
+        if ( isset( $params['raw'] ) && $params['raw'] == 'true' ) {
+            // If raw skip htmlspecialchars()
+        } else {
+            $html = htmlspecialchars( $html );
+        }
         /*
          * 
          * Process shortcodes
@@ -636,7 +655,7 @@ class WPCF_Field
          * Wachout for remove_shortcode('types');
          * TODO Loop possible?
          */
-        $shortcode = do_shortcode( htmlspecialchars( $html ) );
+        $shortcode = do_shortcode( $html );
         $html = htmlspecialchars_decode( stripslashes( $shortcode ) );
 
         return $html;

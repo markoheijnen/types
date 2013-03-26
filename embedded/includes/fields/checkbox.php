@@ -2,7 +2,9 @@
 //add_action('wpcf_relationship_save_child', 'wpcf_fields_checkbox_save_check',
 //        10, 3);
 
-add_action( 'save_post', 'wpcf_fields_checkbox_save_check', 10, 3 );
+
+// Trigger after main hook
+add_action( 'save_post', 'wpcf_fields_checkbox_save_check', 15, 3 );
 
 /**
  * Register data (called automatically).
@@ -223,6 +225,13 @@ function wpcf_fields_checkbox_view( $params ) {
         return htmlspecialchars_decode( $params['#content'] );
     }
 
+    // Check if 'save_empty' is yes and if value is 0 - set value to empty string
+    if ( isset( $params['field']['data']['save_empty'] )
+            && $params['field']['data']['save_empty'] == 'yes'
+            && $params['field_value'] == 0 ) {
+        $params['field_value'] = '';
+    }
+
     if ( $params['field']['data']['display'] == 'db' && $params['field_value'] != '' ) {
         $field = wpcf_fields_get_field_by_slug( $params['field']['slug'] );
         $output = $field['data']['set_value'];
@@ -258,7 +267,9 @@ function wpcf_fields_checkbox_view( $params ) {
  * @param type $cf
  */
 function wpcf_fields_checkbox_save_check() {
+    
     $meta_to_unset = array();
+    $cf = new WPCF_Field();
 
     /*
      * 
@@ -285,7 +296,7 @@ function wpcf_fields_checkbox_save_check() {
         // Loop and search in $_POST
         foreach ( $_POST['_wpcf_check_checkbox'] as $child_id => $slugs ) {
             foreach ( $slugs as $slug => $true ) {
-                $cf = new WPCF_Field();
+                
                 $cf->set( $child_id, $cf->__get_slug_no_prefix( $slug ) );
 
                 // First check main post
@@ -319,6 +330,7 @@ function wpcf_fields_checkbox_save_check() {
     // After collected - delete them
     foreach ( $meta_to_unset as $child_id => $slugs ) {
         foreach ( $slugs as $slug => $true ) {
+            $cf->set( $child_id, $cf->__get_slug_no_prefix( $slug ) );
             if ( $cf->cf['data']['save_empty'] != 'no' ) {
                 update_post_meta( $child_id, $slug, 0 );
             } else {

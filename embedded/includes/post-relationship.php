@@ -5,7 +5,7 @@
 require_once WPCF_EMBEDDED_INC_ABSPATH . '/editor-support/post-relationship-editor-support.php';
 
 add_action( 'wpcf_admin_post_init', 'wpcf_pr_admin_post_init_action', 10, 4 );
-add_action( 'save_post', 'wpcf_pr_admin_save_post_hook', 11, 2 ); // Trigger afer main hook
+add_action( 'save_post', 'wpcf_pr_admin_save_post_hook', 20, 2 ); // Trigger afer main hook
 add_filter( 'get_post_metadata', 'wpcf_pr_meta_belongs_filter', 10, 4 );
 
 /**
@@ -423,17 +423,23 @@ function wpcf_pr_admin_post_meta_box_belongs_form( $post, $type, $belongs ) {
  * @return string 
  */
 function wpcf_pr_admin_update_belongs( $post_id, $data ) {
-    $post_type = key( $data );
-    $post_owner_id = array_shift( $data );
-    if ( !empty( $post_id ) && !empty( $post_type ) && !empty( $post_owner_id ) ) {
-        update_post_meta( $post_id, '_wpcf_belongs_' . $post_type . '_id',
-                $post_owner_id );
-        return __( 'Post updated', 'wpcf' );
-    } else if ( intval( $post_owner_id ) == 0 ) {
-        delete_post_meta( $post_id, '_wpcf_belongs_' . $post_type . '_id' );
-        return __( 'Post updated', 'wpcf' );
+
+    $post = get_post( intval( $post_id ) );
+    if ( empty( $post ) ) {
+        return __( 'Passed wrong parameters', 'wpcf' );
     }
-    return __( 'Passed wrong parameters', 'wpcf' );
+
+    foreach ( $data as $post_type => $post_owner_id ) {
+        $post_owner = get_post( intval( $post_owner_id ) );
+        if ( intval( $post_owner_id ) == 0 ) {
+            delete_post_meta( $post_id, '_wpcf_belongs_' . $post_type . '_id' );
+        } else if ( !empty( $post_owner ) ) {
+            update_post_meta( $post_id, '_wpcf_belongs_' . $post_type . '_id',
+                    $post_owner_id );
+        }
+    }
+
+    return __( 'Post updated', 'wpcf' );
 }
 
 /**
@@ -515,30 +521,40 @@ function wpcf_pr_admin_save_post_hook( $parent_post_id ) {
 
     global $wpcf;
     /*
+     * TODO https://icanlocalize.basecamphq.com/projects/7393061-toolset/todo_items/159760120/comments#225005357
+     * Problematic This should be done once per save (on saving main post)
+     * remove_action( 'save_post', 'wpcf_pr_admin_save_post_hook', 11);
+     */
+    static $cached = false;
+    /*
      * 
      * TODO Monitor this
      */
     // Remove main hook?
     // CHECKPOINT We remove temporarily main hook
 //    remove_action( 'save_post', 'wpcf_admin_save_post_hook', 10, 2 );
-    // This should be done once per save
-    remove_action( 'save_post', 'wpcf_pr_admin_save_post_hook', 11, 2 );
+    if ( !$cached ) {
+        if ( isset( $_POST['wpcf_post_relationship'][$parent_post_id] ) ) {
+            $wpcf->relationship->save_children( $parent_post_id,
+                    (array) $_POST['wpcf_post_relationship'][$parent_post_id] );
+        }
+        // Save belongs if any
+        if ( isset( $_POST['wpcf_pr_belongs'][intval( $parent_post_id )] ) ) {
+            wpcf_pr_admin_update_belongs( intval( $parent_post_id ),
+                    $_POST['wpcf_pr_belongs'][intval( $parent_post_id )] );
+        }
 
-    if ( isset( $_POST['wpcf_post_relationship'][$parent_post_id] ) ) {
-        $wpcf->relationship->save_children( $parent_post_id,
-                (array) $_POST['wpcf_post_relationship'][$parent_post_id] );
-    }
-    // Save belongs if any
-    if ( isset( $_POST['wpcf_pr_belongs'][intval( $parent_post_id )] ) ) {
-        wpcf_pr_admin_update_belongs( intval( $parent_post_id ),
-                $_POST['wpcf_pr_belongs'][intval( $parent_post_id )] );
-    }
+        // WPML
+        wpcf_wpml_relationship_save_post_hook( $parent_post_id );
 
-    // WPML
-    wpcf_wpml_relationship_save_post_hook( $parent_post_id );
-
-    // Restore main hook?
+        // Restore main hook?
 //    add_action( 'save_post', 'wpcf_admin_save_post_hook', 10, 2 );
+        // Actually needs looping over all relationships
+//        debug($_POST['wpcf_pr_belongs']);
+
+        $cached = true;
+    }
+
 }
 
 /**
@@ -568,7 +584,7 @@ function wpcf_pr_add_field_js() {
         jQuery(document).ready(function(){
             wpcfPrVerifyInit();
         });
-                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                    
         function wpcfPrVerifyInit() {
             jQuery('.wpcf-pr-has-entries .wpcf-cd').each(function(){
                 jQuery(this).parents('tr').find(':input').each(function(){
@@ -597,7 +613,7 @@ function wpcf_pr_add_field_js() {
                 });
             });
         }
-                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                            
         function wpcfPrVerify(object, name, value) {
             var form = object.parents('tr').find(':input');
             jQuery.ajax({
@@ -632,4 +648,21 @@ function wpcf_relationship_ajax_data_filter( $posted, $field ) {
             $field );
 
     return is_null( $value ) ? $posted : $value;
+}
+
+function wpcf_relationship_custom_statement_meta_ajax_validation_filter( $null,
+        $object_id, $meta_key, $single ){
+
+    global $wpcf;
+
+    $null = wpcf_relationship_ajax_data_filter( $null, $meta_key );
+
+    if ( !empty( $null ) && !empty( $field ) && $field['type'] == 'date' ) {
+        $time = strtotime( $null );
+        if ( $time ) {
+            return $time;
+        }
+    }
+
+    return $null;
 }

@@ -72,7 +72,7 @@ function wpcf_admin_fields_adjust_group( $post ) {
 function wpcf_admin_fields_get_fields( $only_active = false,
         $disabled_by_type = false, $strictly_active = false ) {
     $required_data = array('id', 'name', 'type', 'slug');
-    $fields = get_option( 'wpcf-fields', array() );
+    $fields = (array) get_option( 'wpcf-fields', array() );
     foreach ( $fields as $k => $v ) {
         $data = wpcf_fields_type_action( $v['type'] );
         if ( empty( $data ) ) {
@@ -456,6 +456,12 @@ function wpcf_fields_get_shortcode( $field, $add = '' ) {
     if ( in_array( $field['type'], array('textfield', 'textarea', 'wysiwyg') ) ) {
         $shortcode .= ' class="" style=""';
     }
+
+    // If repetitive add separator
+    if ( wpcf_admin_is_repetitive( $field ) ) {
+        $shortcode .= ' separator=", "';
+    }
+
     $shortcode .= '][/types]';
     $shortcode = apply_filters( 'wpcf_fields_shortcode', $shortcode, $field );
     $shortcode = apply_filters( 'wpcf_fields_shortcode_type_' . $field['type'],

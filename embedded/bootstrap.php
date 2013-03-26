@@ -8,19 +8,33 @@
  * @since Types 1.2
  */
 
+// Main functions
+require_once dirname( __FILE__ ) . '/functions.php';
+
 /*
  * 
  * 
  * If WPCF_VERSION is not defined - we're running embedded code
  */
 if ( !defined( 'WPCF_VERSION' ) ) {
-
     // Mark that!
     define( 'WPCF_RUNNING_EMBEDDED', true );
-
-    // INITIALIZE!
-    add_action( 'init', 'wpcf_embedded_init' );
 }
+
+/*
+ * 
+ * Forced priority
+ */
+if ( !defined( 'TYPES_INIT_PRIORITY' ) ) {
+    // Early start ( some plugins use 'init' with priority 0 ).
+    define( 'TYPES_INIT_PRIORITY', -1 );
+}
+
+/*
+ * 
+ * Init
+ */
+add_action( 'init', 'wpcf_embedded_init', TYPES_INIT_PRIORITY );
 
 /*
  * 
@@ -71,7 +85,16 @@ $GLOBALS['wpcf'] = new stdClass();
  */
 function wpcf_embedded_init() {
 
+    global $types_instances, $wp_current_filter;
+
+    // Record hook
+    $types_instances['hook'] = $wp_current_filter;
+    $types_instances['init_queued'] = '#' . did_action( 'init' );
+    $types_instances['init_priority'] = TYPES_INIT_PRIORITY;
+    $types_instances['forced_embedded'] = defined( 'TYPES_LOAD_EMBEDDED' ) && TYPES_LOAD_EMBEDDED;
+
     do_action( 'wpcf_before_init' );
+    do_action( 'types_before_init' );
 
     // Set locale
     $locale = get_locale();
@@ -85,7 +108,7 @@ function wpcf_embedded_init() {
     // Define necessary constants if plugin is not present
     // This ones are skipped if used as embedded code!
     if ( !defined( 'WPCF_VERSION' ) ) {
-        define( 'WPCF_VERSION', '1.2' );
+        define( 'WPCF_VERSION', '1.2.1' );
         define( 'WPCF_META_PREFIX', 'wpcf-' );
         define( 'WPCF_EMBEDDED_RELPATH', icl_get_file_relpath( __FILE__ ) );
     } else {
@@ -192,6 +215,15 @@ function wpcf_embedded_init() {
      * $wpcf->repeater - Repetitive field object
      */
 
+    // Set debugging
+    if ( !defined( 'WPCF_DEBUG' ) ) {
+        define( 'WPCF_DEBUG', false );
+    }
+    $wpcf->debug = new stdClass();
+    require WPCF_EMBEDDED_INC_ABSPATH . '/debug.php';
+    add_action( 'wp_footer', 'wpcf_debug', 99999999999999999999999999999999 );
+    add_action( 'admin_footer', 'wpcf_debug', 99999999999999999999999999999 );
+
     // Set field object
     $wpcf->field = new WPCF_Field();
 
@@ -251,16 +283,6 @@ function wpcf_embedded_init() {
     // Check if import/export request is going on
     wpcf_embedded_check_import();
 
-    // Set debugging
-    if ( !defined( 'WPCF_DEBUG' ) ) {
-        define( 'WPCF_DEBUG', false );
-    }
-    if ( WPCF_DEBUG ) {
-        $wpcf->debug = new stdClass();
-        require WPCF_INC_ABSPATH . '/debug.php';
-        add_action( 'wp_footer', 'wpcf_debug', 99999999999999999999999999999999 );
-        add_action( 'admin_footer', 'wpcf_debug', 99999999999999999999999999999 );
-    }
-
+    do_action( 'types_after_init' );
     do_action( 'wpcf_after_init' );
 }

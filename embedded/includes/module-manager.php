@@ -89,18 +89,24 @@ function wpcf_module_inline_table_post_taxonomies() {
 if ( defined( 'MODMAN_PLUGIN_NAME' ) ) {
     add_filter( 'wpmodules_register_sections', 'wpcf_register_modules_sections',
             10, 1 );
+
+    // Post types
     add_filter( 'wpmodules_register_items_' . _TYPES_MODULE_MANAGER_KEY_,
             'wpcf_register_modules_items_types', 10, 1 );
     add_filter( 'wpmodules_export_items_' . _TYPES_MODULE_MANAGER_KEY_,
             'wpcf_export_modules_items_types', 10, 2 );
     add_filter( 'wpmodules_import_items_' . _TYPES_MODULE_MANAGER_KEY_,
             'wpcf_import_modules_items_types', 10, 2 );
+
+    // Groups
     add_filter( 'wpmodules_register_items_' . _GROUPS_MODULE_MANAGER_KEY_,
             'wpcf_register_modules_items_groups', 10, 1 );
     add_filter( 'wpmodules_export_items_' . _GROUPS_MODULE_MANAGER_KEY_,
             'wpcf_export_modules_items_groups', 10, 2 );
     add_filter( 'wpmodules_import_items_' . _GROUPS_MODULE_MANAGER_KEY_,
             'wpcf_import_modules_items_groups', 10, 2 );
+
+    // Taxonomies
     add_filter( 'wpmodules_register_items_' . _TAX_MODULE_MANAGER_KEY_,
             'wpcf_register_modules_items_taxonomies', 10, 1 );
     add_filter( 'wpmodules_export_items_' . _TAX_MODULE_MANAGER_KEY_,
@@ -153,6 +159,7 @@ if ( defined( 'MODMAN_PLUGIN_NAME' ) ) {
                 'title' => $type['labels']['singular_name'],
                 'details' => '<p style="padding:5px;">' . $details . '</p>',
                 '__types_id' => $type['slug'],
+                '__types_title' => $type['labels']['name'],
             );
         }
         return $items;
@@ -160,8 +167,10 @@ if ( defined( 'MODMAN_PLUGIN_NAME' ) ) {
 
     function wpcf_export_modules_items_types( $res, $items ) {
         foreach ( $items as $ii => $item ) {
-            $items[$ii] = str_replace( '12' . _TYPES_MODULE_MANAGER_KEY_ . '21',
-                    '', $item );
+            if ( isset( $item['id'] ) ) {
+                $items[$ii] = str_replace( '12' . _TYPES_MODULE_MANAGER_KEY_ . '21',
+                        '', $item['id'] );
+            }
         }
         require_once WPCF_INC_ABSPATH . '/import-export.php';
         $xmlstring = wpcf_admin_export_selected_data( $items, 'types',
@@ -171,7 +180,8 @@ if ( defined( 'MODMAN_PLUGIN_NAME' ) ) {
 
     function wpcf_import_modules_items_types( $result, $xmlstring ) {
         require_once WPCF_EMBEDDED_INC_ABSPATH . '/import-export.php';
-        $result2 = wpcf_admin_import_data_from_xmlstring( $xmlstring, 'types' );
+        $result2 = wpcf_admin_import_data_from_xmlstring( $xmlstring, 'types',
+                'modman' );
         if ( false === $result2 || is_wp_error( $result2 ) )
             return (false === $result2) ? __( 'Error during Post Types import',
                             'wpcf' ) : $result2->get_error_message( $result2->get_error_code() );
@@ -189,7 +199,8 @@ if ( defined( 'MODMAN_PLUGIN_NAME' ) ) {
                 'id' => '12' . _GROUPS_MODULE_MANAGER_KEY_ . '21' . $group['id'],
                 'title' => $group['name'],
                 'details' => '<p style="padding:5px;">' . $details . '</p>',
-                '__types_id' => $group['id'],
+                '__types_id' => $group['slug'],
+                '__types_title' => $group['name'],
             );
         }
         return $items;
@@ -208,7 +219,8 @@ if ( defined( 'MODMAN_PLUGIN_NAME' ) ) {
 
     function wpcf_import_modules_items_groups( $result, $xmlstring ) {
         require_once WPCF_EMBEDDED_INC_ABSPATH . '/import-export.php';
-        $result2 = wpcf_admin_import_data_from_xmlstring( $xmlstring, 'groups' );
+        $result2 = wpcf_admin_import_data_from_xmlstring( $xmlstring, 'groups',
+                'modman' );
         if ( false === $result2 || is_wp_error( $result2 ) )
             return (false === $result2) ? __( 'Error during Field Groups import',
                             'wpcf' ) : $result2->get_error_message( $result2->get_error_code() );
@@ -228,6 +240,7 @@ if ( defined( 'MODMAN_PLUGIN_NAME' ) ) {
                 'title' => $tax['labels']['singular_name'],
                 'details' => '<p style="padding:5px;">' . $details . '</p>',
                 '__types_id' => $tax['slug'],
+                '__types_title' => $tax['labels']['name'],
             );
         }
         return $items;
@@ -235,8 +248,10 @@ if ( defined( 'MODMAN_PLUGIN_NAME' ) ) {
 
     function wpcf_export_modules_items_taxonomies( $res, $items ) {
         foreach ( $items as $ii => $item ) {
-            $items[$ii] = str_replace( '12' . _TAX_MODULE_MANAGER_KEY_ . '21',
-                    '', $item );
+            if ( isset( $item['id'] ) ) {
+                $items[$ii] = str_replace( '12' . _TAX_MODULE_MANAGER_KEY_ . '21',
+                        '', $item['id'] );
+            }
         }
         require_once WPCF_INC_ABSPATH . '/import-export.php';
         $xmlstring = wpcf_admin_export_selected_data( $items, 'taxonomies',
@@ -247,7 +262,7 @@ if ( defined( 'MODMAN_PLUGIN_NAME' ) ) {
     function wpcf_import_modules_items_taxonomies( $result, $xmlstring ) {
         require_once WPCF_EMBEDDED_INC_ABSPATH . '/import-export.php';
         $result2 = wpcf_admin_import_data_from_xmlstring( $xmlstring,
-                'taxonomies' );
+                'taxonomies', 'modman' );
         if ( false === $result2 || is_wp_error( $result2 ) )
             return (false === $result2) ? __( 'Error during Taxonomies import',
                             'wpcf' ) : $result2->get_error_message( $result2->get_error_code() );
@@ -339,6 +354,8 @@ function wpcf_admin_export_selected_data( array $items, $_type = 'all',
                 }
                 $_data['checksum'] = $_data['hash'] = $wpcf->export->generate_checksum( 'group',
                         $post['ID'] );
+                $_data['__types_id'] = $post['post_name'];
+                $_data['__types_title'] = $post['post_title'];
                 $data['groups']['group-' . $post['ID']] = $_data;
             }
         }
@@ -363,7 +380,8 @@ function wpcf_admin_export_selected_data( array $items, $_type = 'all',
                 // TODO WPML and others should use hook
                 $fields[$field_id] = apply_filters( 'wpcf_export_field',
                         $fields[$field_id] );
-
+                $fields[$field_id]['__types_id'] = $field_id;
+                $fields[$field_id]['__types_title'] = $field['name'];
                 $fields[$field_id]['checksum'] = $fields[$field_id]['hash'] = $wpcf->export->generate_checksum(
                         'field', $field_id
                 );
@@ -399,8 +417,12 @@ function wpcf_admin_export_selected_data( array $items, $_type = 'all',
 //            $custom_types = array_intersect_key( get_option( 'wpcf-custom-types',
 //                            array() ), array_flip( $items ) );
             $_items = array();
-            foreach ( $items as $item ) {
-                $_items[$item['id']] = true;
+            foreach ( $items as $k => $item ) {
+                if ( is_array( $item ) && isset( $item['id'] ) ) {
+                    $_items[$item['id']] = true;
+                } else {
+                    $_items[$item] = true;
+                }
             }
             $custom_types = array_intersect_key( get_option( 'wpcf-custom-types',
                             array() ), $_items );
@@ -413,6 +435,9 @@ function wpcf_admin_export_selected_data( array $items, $_type = 'all',
                 $custom_types[$key]['id'] = $key;
                 $custom_types[$key] = apply_filters( 'wpcf_export_custom_post_type',
                         $custom_types[$key] );
+
+                $custom_types[$key]['__types_id'] = $key;
+                $custom_types[$key]['__types_title'] = $type['labels']['name'];
                 $custom_types[$key]['checksum'] = $custom_types[$key]['hash'] = $wpcf->export->generate_checksum(
                         'custom_post_type', $key, $type
                 );
@@ -458,8 +483,12 @@ function wpcf_admin_export_selected_data( array $items, $_type = 'all',
 //            $custom_taxonomies = array_intersect_key( get_option( 'wpcf-custom-taxonomies',
 //                            array() ), array_flip( $items ) );
             $_items = array();
-            foreach ( $items as $item ) {
-                $_items[$item['id']] = true;
+            foreach ( $items as $k => $item ) {
+                if ( is_array( $item ) && isset( $item['id'] ) ) {
+                    $_items[$item['id']] = true;
+                } else {
+                    $_items[$item] = true;
+                }
             }
             $custom_taxonomies = array_intersect_key( get_option( 'wpcf-custom-taxonomies',
                             array() ), $_items );
@@ -472,6 +501,9 @@ function wpcf_admin_export_selected_data( array $items, $_type = 'all',
                 $custom_taxonomies[$key]['id'] = $key;
                 $custom_taxonomies[$key] = apply_filters( 'wpcf_export_custom_post_type',
                         $custom_taxonomies[$key] );
+
+                $custom_taxonomies[$key]['__types_id'] = $key;
+                $custom_taxonomies[$key]['__types_title'] = $tax['labels']['name'];
                 $custom_taxonomies[$key]['checksum'] = $wpcf->export->generate_checksum(
                         'custom_taxonomy', $key, $tax
                 );
@@ -490,12 +522,34 @@ function wpcf_admin_export_selected_data( array $items, $_type = 'all',
     } else if ( $return == 'xml' ) {
         return $xml->array2xml( $data, 'types' );
     } else if ( $return == 'module_manager' ) {
+        $items = array();
+        // Re-arrange fields
+        if ( !empty( $data['fields'] ) ) {
+            foreach ( $data['fields'] as $_data ) {
+                if ( is_array( $_data ) && isset( $_data['__types_id'] )
+                        && isset( $_data['checksum'] ) ) {
+                    $_item = array();
+                    $_item['hash'] = $_item['checksum'] = $_data['checksum'];
+                    $_item['id'] = $_data['__types_id'];
+                    $_item['title'] = $_data['__types_title'];
+                    $items['__fields'][$_data['__types_id']] = $_item;
+                }
+            }
+        }
         // Add checksums to items
-        foreach ( $data as $type ) {
+        foreach ( $data as $_t => $type ) {
             foreach ( $type as $_data ) {
-                if ( isset( $_data['__types_id'] )
-                        && isset( $items[$_data['__types_id']] ) ) {
-                    $items[$_data['__types_id']] = $_data['checksum'];
+                // Skip fields
+                if ( $_t == 'fields' ) {
+                    continue;
+                }
+                if ( is_array( $_data ) && isset( $_data['__types_id'] )
+                        && isset( $_data['checksum'] ) ) {
+                    $_item = array();
+                    $_item['hash'] = $_item['checksum'] = $_data['checksum'];
+                    $_item['id'] = $_data['__types_id'];
+                    $_item['title'] = $_data['__types_title'];
+                    $items[$_data['__types_id']] = $_item;
                 }
             }
         }
@@ -562,13 +616,14 @@ function wpcf_admin_export_selected_data( array $items, $_type = 'all',
  * @param type $_type
  * @return \WP_Error|boolean
  */
-function wpcf_admin_import_data_from_xmlstring( $data = '', $_type = 'types' ) {
+function wpcf_admin_import_data_from_xmlstring( $data = '', $_type = 'types',
+        $context = 'types' ) {
 
     global $wpdb, $wpcf;
 
     /*
      * 
-     * TODO Types 1.2.1
+     * TODO Types 1.3
      * Merge with wpcf_admin_import_data()
      */
 
@@ -598,24 +653,31 @@ function wpcf_admin_import_data_from_xmlstring( $data = '', $_type = 'types' ) {
         $imported = true;
 
         $groups = array();
-        // Set insert data from XML
+
+        // Set Groups insert data from XML
         foreach ( $data->groups->group as $group ) {
             $group = (array) $group;
-            $_id = wpcf_modman_set_submitted_id( _GROUPS_MODULE_MANAGER_KEY_,
-                    $group['ID'] );
-            if ( !isset( $_POST['items']['groups'][$_id] ) ) {
-                continue;
+            // TODO 1.2.1 Remove
+//            $_id = wpcf_modman_set_submitted_id( _GROUPS_MODULE_MANAGER_KEY_,
+//                    $group['ID'] );
+            $_id = $group['__types_id'];
+
+            // If Types check if exists in $_POST
+            if ( $context == 'types' || $context == 'modman' ) {
+                if ( !isset( $_POST['items']['groups'][$_id] ) ) {
+                    continue;
+                }
             }
+
             $group = wpcf_admin_import_export_simplexml2array( $group );
-            $groups[$group['ID']] = $group;
-        }
-        foreach ( $groups as $group_id => $group ) {
-            $groups[$group_id]['add'] = true;
-            $groups[$group_id]['update'] = false;
+            $group['add'] = true;
+            $group['update'] = false;
+
+            $groups[$_id] = $group;
         }
 
         // Insert groups
-        foreach ( $groups as $group_id => $group ) {
+        foreach ( $groups as $group ) {
             $post = array(
                 'post_status' => $group['post_status'],
                 'post_type' => 'wp-types-group',
@@ -675,7 +737,8 @@ function wpcf_admin_import_data_from_xmlstring( $data = '', $_type = 'types' ) {
                 // Update meta
                 if ( !empty( $group['meta'] ) ) {
                     foreach ( $group['meta'] as $meta_key => $meta_value ) {
-                        update_post_meta( $group_wp_id, $meta_key, $meta_value );
+                        update_post_meta( $group_wp_id, $meta_key,
+                                maybe_unserialize( $meta_value ) );
                     }
                 }
                 $group_check[] = $group_wp_id;
@@ -697,12 +760,35 @@ function wpcf_admin_import_data_from_xmlstring( $data = '', $_type = 'types' ) {
             }
             // Insert fields
             foreach ( $fields as $field_id => $field ) {
+
+                // If Types check if exists in $_POST
+                // TODO Regular import do not have structure like this
+                if ( $context == 'types' || $context == 'modman' ) {
+                    if ( !isset( $_POST['items']['groups']['__fields__' . $field['slug']] ) ) {
+                        continue;
+                    }
+                }
+
                 if ( (isset( $field['add'] ) && !$field['add']) && !$overwrite_fields ) {
                     continue;
                 }
                 if ( empty( $field['id'] ) || empty( $field['name'] ) || empty( $field['slug'] ) ) {
                     continue;
                 }
+
+                $_new_field = !isset( $fields_existing[$field_id] );
+
+                if ( $_new_field ) {
+                    $result['new'] += 1;
+                } else {
+                    $_checksum = $wpcf->import->checksum( 'field',
+                            $fields_existing[$field_id]['slug'],
+                            $field['checksum'] );
+                    if ( !$_checksum ) {
+                        $result['updated'] += 1;
+                    }
+                }
+
                 $field_data = array();
                 $field_data['id'] = $field['id'];
                 $field_data['name'] = $field['name'];
@@ -737,12 +823,19 @@ function wpcf_admin_import_data_from_xmlstring( $data = '', $_type = 'types' ) {
         foreach ( $data->types->type as $type ) {
             $type = (array) $type;
             $type = wpcf_admin_import_export_simplexml2array( $type );
-            $_id = wpcf_modman_set_submitted_id( _TYPES_MODULE_MANAGER_KEY_,
-                    $type['id'] );
-            if ( !isset( $_POST['items']['types'][$_id] ) ) {
-                continue;
+            // TODO 1.2.1 Remove
+//            $_id = wpcf_modman_get_submitted_id( _TYPES_MODULE_MANAGER_KEY_,
+//                    $type['id'] );
+            $_id = strval( $type['__types_id'] );
+
+            // If Types check if exists in $_POST
+            if ( $context == 'types' || $context == 'modman' ) {
+                if ( !isset( $_POST['items']['types'][$_id] ) ) {
+                    continue;
+                }
             }
-            $types[$type['id']] = $type;
+
+            $types[$_id] = $type;
         }
         // Insert types
         foreach ( $types as $type_id => $type ) {
@@ -799,13 +892,20 @@ function wpcf_admin_import_data_from_xmlstring( $data = '', $_type = 'types' ) {
         $taxonomies_check = array();
         // Set insert data from XML
         foreach ( $data->taxonomies->taxonomy as $taxonomy ) {
-            $_id = wpcf_modman_set_submitted_id( _TAX_MODULE_MANAGER_KEY_,
-                    $taxonomy['id'] );
-            if ( !isset( $_POST['items']['taxonomies'][$_id] ) ) {
-                continue;
+            // TODO 1.2.1 Remove
+//            $_id = wpcf_modman_get_submitted_id( _TAX_MODULE_MANAGER_KEY_,
+//                    $taxonomy['__types_id'] );
+            $_id = strval( $taxonomy->__types_id );
+
+            // If Types check if exists in $_POST
+            if ( $context == 'types' || $context == 'modman' ) {
+                if ( !isset( $_POST['items']['taxonomies'][$_id] ) ) {
+                    continue;
+                }
             }
+
             $taxonomy = wpcf_admin_import_export_simplexml2array( $taxonomy );
-            $taxonomies[$taxonomy['id']] = $taxonomy;
+            $taxonomies[$_id] = $taxonomy;
         }
         // Insert taxonomies
         foreach ( $taxonomies as $taxonomy_id => $taxonomy ) {
@@ -864,7 +964,7 @@ function wpcf_modman_items_check_custom_post_types( $items ) {
                 $item['id'] );
         if ( $item['exists'] && isset( $item['hash'] ) ) {
             $item['is_different'] = $wpcf->import->checksum( 'custom_post_type',
-                    $item['id'], $item['hash'] );
+                            $item['id'], $item['hash'] ) ? false : true;
         }
         $items[$k] = $item;
     }
@@ -881,16 +981,38 @@ function wpcf_modman_items_check_groups( $items ) {
 
     global $wpcf;
 
-    foreach ( $items as $k => $item ) {
-        $item['exists'] = $wpcf->import->item_exists( 'group', $item['id'] );
-        if ( $item['exists'] && isset( $item['hash'] ) ) {
-            $item['is_different'] = $wpcf->import->checksum( 'group',
-                    $item['id'], $item['hash'] );
+    $_items = array();
+    $_fields = array();
+
+    // Process fields if any
+    if ( !empty( $items['__fields'] ) ) {
+        foreach ( $items['__fields'] as $k => $item ) {
+            $_item = array();
+            $_item['id'] = '__fields__' . $item['id'] . '';
+            $_item['title'] = sprintf( __( 'Field: %s', 'wpcf' ), $item['title'] );
+            $_item['exists'] = $wpcf->import->item_exists( 'field', $item['id'] );
+            if ( $_item['exists'] && isset( $item['hash'] ) ) {
+                $_item['is_different'] = $wpcf->import->checksum( 'field',
+                                $item['id'], $item['hash'] ) ? false : true;
+            }
+            $_fields[] = $_item;
         }
-        $items[$k] = $item;
+        unset( $items['__fields'] );
     }
 
-    return $items;
+    foreach ( $items as $k => $item ) {
+        $_item = array();
+        $_item['id'] = $item['id'];
+        $_item['title'] = $item['title'];
+        $_item['exists'] = $wpcf->import->item_exists( 'group', $item['id'] );
+        if ( $_item['exists'] && isset( $item['hash'] ) ) {
+            $_item['is_different'] = $wpcf->import->checksum( 'group',
+                            $item['id'], $item['hash'] ) ? false : true;
+        }
+        $_items[] = $_item;
+    }
+
+    return array_merge( $_items, $_fields );
 }
 
 /**
@@ -907,7 +1029,7 @@ function wpcf_modman_items_check_taxonomies( $items ) {
                 $item['id'] );
         if ( $item['exists'] && isset( $item['hash'] ) ) {
             $item['is_different'] = $wpcf->import->checksum( 'custom_taxonomy',
-                    $item['id'], $item['hash'] );
+                            $item['id'], $item['hash'] ) ? false : true;
         }
         $items[$k] = $item;
     }

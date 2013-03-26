@@ -123,7 +123,7 @@ function wpcf_repetitive_delete_new_button( $field, $post ) {
 function wpcf_repetitive_form( $field, $post ) {
     // Add repetitive control buttons if not copied by WPML
     if ( isset( $field['wpml_action'] ) && $field['wpml_action'] == 'copy' ) {
-        return '';
+        return '<div style="clear:both;"></div>';
     }
     $repetitive_form = '';
     $repetitive_form .= '<div class="wpcf-repetitive-buttons">';
@@ -135,11 +135,13 @@ function wpcf_repetitive_form( $field, $post ) {
 /**
  * Returns HTML formatted drag button.
  * 
- * @param type $cf
+ * @param type $field
  * @param type $post
- * @param type $show
  * @return string 
  */
-function wpcf_repetitive_drag_button() {
+function wpcf_repetitive_drag_button( $field, $post ) {
+    if ( isset( $field['wpml_action'] ) && $field['wpml_action'] == 'copy' ) {
+        return '';
+    }
     return '<div class="wpcf-repetitive-drag">&nbsp;</div>';
 }

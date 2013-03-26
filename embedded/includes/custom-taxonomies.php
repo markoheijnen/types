@@ -49,17 +49,6 @@ function wpcf_custom_taxonomies_default() {
 }
 
 /**
- * Returns taxonomy settings.
- * 
- * @param type $taxonomy
- * @return type
- */
-function wpcf_get_custom_taxonomy_settings( $item ) {
-    $custom = get_option( 'wpcf-custom-taxonomies', array() );
-    return !empty( $custom[$item] ) ? $custom[$item] : array();
-}
-
-/**
  * Inits custom taxonomies.
  */
 function wpcf_custom_taxonomies_init() {

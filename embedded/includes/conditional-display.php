@@ -29,9 +29,6 @@ if ( !function_exists( 'wpv_filter_parse_date' ) ) {
     require_once WPCF_EMBEDDED_ABSPATH . '/common/wpv-filter-date-embedded.php';
 }
 
-wpcf_admin_add_js_settings( 'wpcfConditionalVerifyGroup',
-        wp_create_nonce( 'cd_group_verify' ) );
-
 /*
  * since Types 1.2 Filter validation JS
  */

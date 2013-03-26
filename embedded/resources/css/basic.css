@@ -417,3 +417,7 @@ input.wpcf-form-error {
     font-size: 0.9em;
     font-style: italic;
 }
+.types-ajax #screen-meta-links,
+.types-ajax #screen-meta {
+    display: none;
+}
