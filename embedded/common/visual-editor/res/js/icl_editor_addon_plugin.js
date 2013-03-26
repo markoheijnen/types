@@ -39,10 +39,15 @@ jQuery(document).ready(function(){
      * Important when switching between editor instances.
      */
     window.wpcfActiveEditor = false;
-    jQuery('.wpcf-wysiwyg .editor_addon_wrapper .item, #postdivrich'
-        + '.editor_addon_wrapper .item').click(function(){
+    jQuery('.wp-media-buttons a, .wpcf-wysiwyg .editor_addon_wrapper .item, #postdivrich .editor_addon_wrapper .item').click(function(){
         window.wpcfActiveEditor = jQuery(this).parents('.wpcf-wysiwyg, #postdivrich')
         .find('textarea').attr('id');
+        
+        /*
+         *
+         * TODO 1.3 Why we do not have saving cookie in common?
+         */
+//        document.cookie = "wpcfActiveEditor="+window.wpcfActiveEditor+"; expires=Monday, 31-Dec-2020 23:59:59 GMT; path="+wpcf_cookiepath+"; domain="+wpcf_cookiedomain+";";
     });
     
     /*

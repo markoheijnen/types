@@ -61,3 +61,4 @@ add_action( 'admin_footer', 'wpcf_inc_test' );
 function wpcf_inc_test() {
 //    debug( types_get_fields( array(), 'wpml' ) );
 }
+//include WPCF_EMBEDDED_INC_ABSPATH . '/examples/google-map.php';

@@ -374,7 +374,12 @@ class WPCF_Relationship
      * @return type
      */
     function get_submitted_data( $parent_id, $child_id, $field ) {
-        return isset( $_POST['wpcf_post_relationship'][$parent_id][$child_id][$field->slug] ) ? $_POST['wpcf_post_relationship'][$parent_id][$child_id][$field->slug] : null;
+        if (!is_string($field)) {
+            $_field_slug = $field->slug;
+        } else {
+            $_field_slug = $field;
+        }
+        return isset( $_POST['wpcf_post_relationship'][$parent_id][$child_id][$_field_slug] ) ? $_POST['wpcf_post_relationship'][$parent_id][$child_id][$_field_slug] : null;
     }
 
 }

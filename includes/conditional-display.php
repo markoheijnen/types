@@ -144,7 +144,7 @@ function wpcf_cd_admin_form_filter( $data, $group = false ) {
             }
         }
     }
-    
+
     $form['cd']['add_close'] = array(
         '#type' => 'markup',
         '#markup' => '</div>',
@@ -407,8 +407,8 @@ function wpcf_cd_fields_form_additional_filters( $filters, $update ) {
     $data = array();
     $data['id'] = !empty( $update ) ? $update['name'] : wpcf_unique_id( serialize( $filters ) );
     if ( $update ) {
-        $data['data']['conditional_display'] = get_post_meta( $update['id'],
-                '_wpcf_conditional_display', true );
+        $data['data']['conditional_display'] = maybe_unserialize( get_post_meta( $update['id'],
+                        '_wpcf_conditional_display', true ) );
     } else {
         $data['data']['conditional_display'] = array();
     }

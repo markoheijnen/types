@@ -71,17 +71,6 @@ function wpcf_custom_types_default() {
 }
 
 /**
- * Returns custom post type settings.
- * 
- * @param type $post_type
- * @return type
- */
-function wpcf_get_custom_post_type_settings( $item ) {
-    $custom = get_option( 'wpcf-custom-types', array() );
-    return !empty( $custom[$item] ) ? $custom[$item] : array();
-}
-
-/**
  * Inits custom types.
  */
 function wpcf_custom_types_init() {

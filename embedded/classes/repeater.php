@@ -302,12 +302,6 @@ class WPCF_Repeater extends WPCF_Field
             $this->description = $_main_element['#description'];
         }
 
-        // Set title
-        $form[$unique_id . '_main_title'] = array(
-            '#type' => 'markup',
-            '#markup' => '<strong>' . $this->title . '</strong><br/>',
-        );
-
         /*
          * 
          * 
@@ -320,6 +314,12 @@ class WPCF_Repeater extends WPCF_Field
             . $form_id
             . '_repetitive_wrapper_' . $unique_id
             . '" class="wpcf-wrap wpcf-repetitive-wrapper" style="' . $css_cd . '">',
+        );
+        
+        // Set title
+        $form[$unique_id . '_main_title'] = array(
+            '#type' => 'markup',
+            '#markup' => '<strong>' . $this->title . '</strong><br/>',
         );
 
         // Set hidden mark field

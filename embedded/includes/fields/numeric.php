@@ -1,5 +1,10 @@
 <?php
 
+// TODO 1.2.3 Allow saving numeric as 0.
+// 
+// Trigger after main hook
+//add_action( 'save_post', 'wpcf_fields_numeric_save_check', 15, 3 );
+
 /**
  * Register data (called automatically).
  * 

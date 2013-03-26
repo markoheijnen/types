@@ -438,7 +438,7 @@ function wpcf_fields_image_view( $params ) {
         //////////////////////////
         // If width and height are not set then check the size parameter.
         // This handles the case when the image is not an attachment.
-        if ( !$width && !$height && !empty( $params['size'] ) ) {
+        if ( empty( $width ) && empty( $height ) && !empty( $params['size'] ) ) {
             //print_r('no_width_no_height_and_size');
             switch ( $params['size'] ) {
                 case 'thumbnail':
@@ -462,8 +462,8 @@ function wpcf_fields_image_view( $params ) {
         }
 
 
-        // Check if image is outsider
-        if ( !$image_data['is_outsider'] ) {
+        // Check if image is outsider and require $width and $height
+        if ( (!empty( $width ) || !empty( $height )) && !$image_data['is_outsider'] ) {
             //print_r('Not is_outsider');
             $resized_image = wpcf_fields_image_resize_image(
                     $params['field_value'], $width, $height, 'relpath', false,
@@ -655,7 +655,7 @@ function wpcf_fields_image_resize_image( $url_path, $width = 300, $height = 200,
  */
 function wpcf_fields_image_get_data( $image ) {
 
-    global $current_user;
+    global $wpcf;
 
     // Check if already cached
     static $cache = array();
@@ -763,9 +763,19 @@ function wpcf_fields_image_get_data( $image ) {
                         $image ) );
     }
 
+    // DEbug
+    $wpcf_debug = array(
+        'image' => $image,
+        'docroot' => $_SERVER['DOCUMENT_ROOT'],
+    );
+
     // Set remote if enabled
     if ( $data['is_outsider'] && wpcf_get_settings( 'images_remote' ) ) {
         $remote = wpcf_fields_image_get_remote( $image );
+
+        // DEbug
+        $wpcf_debug['remote'] = $remote;
+
         if ( !is_wp_error( $remote ) ) {
             $data['is_outsider'] = 0;
             $data['is_in_upload_path'] = 1;
@@ -786,6 +796,10 @@ function wpcf_fields_image_get_data( $image ) {
 
     // Cache it
     $cache[md5( $data['image'] )] = $data;
+
+    // DEbug
+    $wpcf_debug['data'] = $data;
+    $wpcf->debug->images['processed'][md5( $image )] = $wpcf_debug;
 
     return $data;
 }
@@ -834,6 +848,8 @@ function wpcf_image_http_request_timeout( $timeout ) {
  * @return \WP_Error 
  */
 function wpcf_fields_image_get_remote( $url ) {
+
+    global $wpcf;
 
     $refresh = false;
 
@@ -963,6 +979,9 @@ function wpcf_fields_image_clear_cache( $cache_dir = null, $action = 'outdated' 
  * @return type
  */
 function wpcf_fields_image_uploads_realpath( $args ) {
+
+    global $wpcf;
+
     $fixes = array('path', 'subdir', 'basedir');
     foreach ( $fixes as $fix ) {
         if ( isset( $args[$fix] ) ) {
@@ -979,6 +998,13 @@ function wpcf_fields_image_uploads_realpath( $args ) {
              * http://php.net/manual/en/ini.core.php#ini.open-basedir
              */
             $realpath = @realpath( $args[$fix] );
+
+            $wpcf->debug->images['relpath_fixes'][$fix] = array(
+                'realpath' => $realpath,
+                'args' => $args[$fix],
+                'altered' => $realpath != $args[$fix] && $realpath !== false ? 'TRUE' : 'FALSE',
+            );
+
 //            $open_basedir = @ini_get( 'open_basedir' );
             if ( $realpath !== false ) {
                 $args[$fix] = $realpath;
@@ -1105,5 +1131,15 @@ function wpcf_image_resize( $file, $max_w, $max_h, $crop = false,
  */
 function wpcf_fields_image_win32_update_attached_file_filter( $file,
         $attachment_id ) {
-    return str_replace( '\\', '/', $file );
+
+    global $wpcf;
+
+    $return = str_replace( '\\', '/', $file );
+    $wpcf->debug->images['Win']['update_attached_file_filter'][] = array(
+        'file' => $file,
+        'return' => $return,
+        'attachment_id' => $attachment_id,
+    );
+
+    return $return;
 }

@@ -215,7 +215,7 @@ function wpcf_fields_checkboxes_view( $params ) {
             }
         }
         $output = implode( array_values( $params['field_value'] ), $separator );
-        return $output;
+        return empty($output) ? '__wpcf_skip_empty' : $output;
     }
 
     $i = 0;

@@ -72,30 +72,31 @@ function wpcf_admin_post_init( $post = false ) {
 
     // Activate scripts
     if ( $wpcf_active ) {
-        wp_enqueue_script('wpcf-fields-post',
+        wp_enqueue_script( 'wpcf-fields-post',
                 WPCF_EMBEDDED_RES_RELPATH . '/js/fields-post.js',
-                array('jquery'), WPCF_VERSION);
-        wp_enqueue_script('wpcf-form-validation',
+                array('jquery'), WPCF_VERSION );
+        wp_enqueue_script( 'wpcf-form-validation',
                 WPCF_EMBEDDED_RES_RELPATH . '/js/'
                 . 'jquery-form-validation/jquery.validate.min.js',
-                array('jquery'), WPCF_VERSION);
-        wp_enqueue_script('wpcf-form-validation-additional',
+                array('jquery'), WPCF_VERSION );
+        wp_enqueue_script( 'wpcf-form-validation-additional',
                 WPCF_EMBEDDED_RES_RELPATH . '/js/'
                 . 'jquery-form-validation/additional-methods.min.js',
-                array('jquery'), WPCF_VERSION);
-        wp_enqueue_style('wpcf-fields-basic',
+                array('jquery'), WPCF_VERSION );
+        wp_enqueue_style( 'wpcf-fields-basic',
                 WPCF_EMBEDDED_RES_RELPATH . '/css/basic.css', array(),
-                WPCF_VERSION);
-        wp_enqueue_style('wpcf-fields-post',
+                WPCF_VERSION );
+        wp_enqueue_style( 'wpcf-fields-post',
                 WPCF_EMBEDDED_RES_RELPATH . '/css/fields-post.css',
-                array('wpcf-fields-basic'), WPCF_VERSION);
-        add_action('admin_footer', 'wpcf_admin_post_js_validation');
+                array('wpcf-fields-basic'), WPCF_VERSION );
+        wpcf_enqueue_scripts();
     }
 
     // Add validation
     // TODO Move to wpcf_enqueue_scripts()
     add_action( 'admin_footer', 'wpcf_admin_post_js_validation' );
-    do_action('wpcf_admin_post_init', $post_type, $post, $groups, $wpcf_active);
+
+    do_action( 'wpcf_admin_post_init', $post_type, $post, $groups, $wpcf_active );
 }
 
 
@@ -436,8 +437,8 @@ function wpcf_admin_post_save_post_hook( $post_ID, $post ) {
                  */
                 $wpcf->field->save();
             }
-            
-            do_action('wpcf_post_field_saved', $post_ID, $field);
+
+            do_action( 'wpcf_post_field_saved', $post_ID, $field );
         }
     }
 
@@ -486,8 +487,8 @@ function wpcf_admin_post_save_post_hook( $post_ID, $post ) {
             }
         }
     }
-    
-    do_action('wpcf_post_saved', $post_ID);
+
+    do_action( 'wpcf_post_saved', $post_ID );
 }
 
 /**
@@ -563,20 +564,17 @@ function wpcf_admin_post_process_fields( $post = false, $fields = array(),
              * 
              * @since Types 1.2
              */
-            if ( !empty( $original_cf['fields'] ) ) {
-                // Check if marked
-                if ( in_array( wpcf_types_get_meta_prefix( $field ) . $field['slug'],
-                                $original_cf['fields'] ) ) {
-
-                    /*
-                     * See if repeater can handle copied fields
-                     */
-                    // Set WPML action
-                    $field['wpml_action'] = 'copy';
-                    $wpcf->repeater->set( $original_cf['original_post_id'],
-                            $field );
-                    $fields_processed = $fields_processed + $wpcf->repeater->get_fields_form();
-                }
+            if ( !empty( $original_cf['fields'] )
+                    && in_array( wpcf_types_get_meta_prefix( $field ) . $field['slug'],
+                            $original_cf['fields'] ) ) {
+                /*
+                 * See if repeater can handle copied fields
+                 */
+                // Set WPML action
+                $field['wpml_action'] = 'copy';
+                $wpcf->repeater->set( get_post( $original_cf['original_post_id'] ),
+                        $field );
+                $fields_processed = $fields_processed + $wpcf->repeater->get_fields_form();
             } else {
                 // Set repeater
                 /*
@@ -636,12 +634,12 @@ function wpcf_admin_post_process_fields( $post = false, $fields = array(),
 
             // Check if repetitive field is copied using WPML
             if ( !empty( $original_cf['fields'] ) ) {
-                if ( in_array( wpcf_types_get_meta_prefix( $field ) . $field['slug'],
-                                $original_cf['fields'] ) ) {
+                if ( in_array( $wpcf->field->slug, $original_cf['fields'] ) ) {
+                    // Set WPML action
                     $field['wpml_action'] = 'copy';
-                    $field['value'] = get_post_meta( $original_cf['original_post_id'],
-                            wpcf_types_get_meta_prefix( $field ) . $field['slug'],
-                            true );
+                    // Switch to parent post
+                    $wpcf->field->set( get_post( $original_cf['original_post_id'] ),
+                            $field );
                 }
             }
             /*
@@ -717,8 +715,8 @@ function wpcf_admin_post_process_field( $field_object ) {
                 'url' => 'textfield',
             );
             if ( !array_key_exists( $field_object->cf['type'], $_allowed ) ) {
-                _deprecated_argument( 'inherited_field_type', '1.2',
-                        'Since Types 1.2 we encourage developers to completely define fields' );
+//                _deprecated_argument( 'inherited_field_type', '1.2',
+//                        'Since Types 1.2 we encourage developers to completely define fields' );
             }
             $inherited_field_data = wpcf_fields_type_action( $field_object->config->inherited_field_type );
         }
